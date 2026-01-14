@@ -381,7 +381,7 @@
 
     const time = document.createElement("div");
     time.className = "time";
-    time.dataset.time = time.toISOString();
+    time.dataset.createdAt = new Date().toISOString();
     time.innerText = "Just now";
 
     //const timestamp = new Date();
@@ -509,22 +509,40 @@
   })
   function updatestatus(time) {
    function update(){
-      const usertime = new Date(time.dataset.usertime);
+      const createdAt = new Date(time.dataset.createdAt);
       const curr = new Date();
-      const calct = Math.floor((curr-usertime)/1000);
+      const calct = Math.floor((curr - createdAt)/1000);
 
       if(calct < 5){;
       time.innerText="Just Now";
       }
       else if(calct < 60) {
-     time.innerText=`${time} sec ago`;
+     time.innerText=`${calct} sec`;
       }
-      else if
-
+      else if(calct < 3600){
+        time.innerText =`${Math.floor(calct/60)} min`;
+      }
+      else if(calct < 86400){
+        time.innerText = `${Math.floor(calct/3600)} hour`;
+      }
+       else if (calct < 86400* 2){
+      time.innerText = 'Yesterday';
+     }
+     else if(calct < 604800){
+      time.innerText = `${Math.floor(calct/86400)} days`; //2592000 : 30 days, YEAR: 31536000
+     }
+     else if(calct <2592000){
+      time.innerText = `${Math.floor(calct/86400)} week`;
+     }
+     else if(calct < 31536000){
+      time.innerText =`${Math.floor(calct/2592000)} month`;
+     }
+     else {
+      time.innerText = `${Math.floor(calct/31536000)} years`;
+    }
    }
-   setInterval(() => {
-    update
-   }, 1000);
+    update();
+   setInterval(update,1000);
   }
 
 
@@ -547,7 +565,7 @@
   }
 
   document.addEventListener("click", async (e) => {
-    const btn = e.target.closest(".translate"); // closest = upward
+    const btn = e.target.closest("#translate"); // closest = upward
     //   const trans = btn.parentElement.querySelector(".lanstatus"); // 
     if (!btn) return;
 
@@ -557,15 +575,15 @@
     if (!review) return;
 
     btn.disabled = true;
-    trans.innerText = "translating...";
+    status.innerText = "translating...";
 
     const translated = await translateall(review.innerText);
     review.innerText = translated;
 
     // btn.innerHTML = "";
-    trans.innerText = "Translated"
+    status.innerText = "Translated"
     setTimeout(() => {
-      trans.innerHTML = `<b>Available</b>`;
+      status.innerHTML = `<b>Available</b>`;
     }, 3000);
     btn.disabled = false;
   })
