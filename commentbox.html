@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+    integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <title>Document</title>
+  <style>
+    * {
+      /*toLocaleTimeString() = 12:12:12 */
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(to left, black, rgb(1, 1, 91), black);
+    }
+
+    .commentb {
+      width: 80vw;
+      height: 40vh;
+      border: 1px solid white;
+      margin: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      flex-direction: column;
+    }
+
+    .commentb h3 {
+      color: yellow;
+      margin-left: 30vw;
+    }
+
+    #time {
+      color: white;
+    }
+
+    textarea {
+      resize: none;
+      width: 40vw;
+      height: 25vh;
+      margin-left: 30vw;
+      font-family: Arial, sans-serif;
+      outline: none;
+      background-color: lab(100% 0.01 -0.01);
+      color: black;
+      text-align: left;
+      font-size: medium;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    textarea:focus {
+      background-color: rgb(255, 255, 255);
+      border: 3px solid yellow;
+      border-color: yellow;
+      box-shadow: 2px 2px 2px 2px rgb(195, 237, 7);
+    }
+
+    textarea::placeholder {
+      color: red;
+      text-align: center;
+      align-items: center;
+      padding: 13vh;
+      font-size: larger;
+      font-style: italic;
+    }
+
+    textarea:focus::placeholder {
+      color: transparent;
+    }
+
+    .comments {
+      overflow-y: auto;
+      width: 80vw;
+      border: 1px solid white;
+      margin: auto;
+      color: white;
+    }
+
+    .overalluser {
+      background-color: rgb(36, 36, 98);
+      color: whitesmoke;
+      width: 300px;
+      height: auto;
+      margin-top: 5px;
+      min-height: 150px;
+      border: 1px solid yellow;
+      margin-left: 5px;
+      margin-bottom: 5px;
+      position: relative;
+      border-radius: 5px;
+      display: flex;
+      align-items: start;
+      flex-direction: column;
+      flex-wrap: wrap;
+      text-align: center;
+    }
+
+    .review {
+      color: whitesmoke;
+      border: 1px solid yellow;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: start;
+      background-color: rgb(110, 96, 216);
+      margin-top: 10px;
+    }
+
+    .time {
+      color: yellow;
+      height: 17px;
+      width: 50px;
+      background-color: rgb(78, 66, 203);
+      border: 1px solid rgb(200, 158, 158);
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      margin-top: 95px;
+      margin-left: 80%;
+      font-size: 10px;
+    }
+
+    emoji-picker,
+    .emoji-picker {
+      z-index: 99999 !important;
+    }
+
+    .totaltran {
+      width: 30px;
+      height: 17px;
+      background-color: rgb(78, 66, 203);
+      margin-top: 90px;
+      position: absolute;
+    }
+
+    #translate,
+    #likebtn,
+    #dislikebtn,
+    #replybtn {
+      width: 25px;
+      height: 15px;
+      background-color: rgb(78, 66, 203);
+      color: white;
+    }
+
+    #likebtn,
+    #dislikebtn,
+    #replybtn {
+      width: 3vw;
+      height: 3vh;
+    }
+
+    .fa-language {
+      color: white;
+      border: rgb(78, 66, 203);
+    }
+
+    .lanstatus {
+      font-size: 10px;
+    }
+
+    .rating {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 40vw;
+      height: 7vh;
+      background-color: rgb(0, 0, 0);
+      margin-left: 37.6%;
+    }
+
+    .rate {
+      background-color: rgb(0, 0, 0);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: row;
+    }
+
+    .fa-star {
+      color: yellow;
+      background-color: rgb(0, 0, 0);
+      width: 35px;
+      height: 35px;
+      font-size: 30px;
+    }
+
+    .rating-display {
+      background-color: transparent;
+      position: relative;
+      display: flex;
+      gap: 0px;
+      justify-content: center;
+      align-items: center;
+      margin-top: 15px;
+    }
+
+    #allbtn {
+      display: flex;
+      justify-content: space-around;
+      width: 100px;
+      height: 10px;
+    }
+
+    #uppersec {
+      display: flex;
+      justify-content: space-between;
+      flex-direction: row;
+      background-color: black;
+      align-items: center;
+      width: 19vw;
+      margin: auto;
+      margin-top: 0px;
+      position: relative;
+    }
+
+    #extrabtn {
+  position: absolute;
+  top: 17px;
+  right: -68px;
+  width: 120px;
+  background: #0f172a;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.95);
+  opacity: 0;
+  transition: all 0.18s ease;
+  z-index: 999;
+}
+
+#extrabtn.show {
+  display: flex;
+  transform: scale(1);
+  opacity: 1;
+}
+
+#extrabtn:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.inextra{
+  display: flex;
+  justify-content:stretch;
+}
+.fa-flag,.fa-ban,.fa-bookmark,.fa-address-book,.fa-circle-info,.fa-marker{
+  margin-right: 5px;
+  margin-left: 5px;
+  margin-top: 2px;
+}
+  </style>
+</head>
+
+<body>
+  <div class="commentb">
+    <h3>Reviews</h3>
+    <div class="rating">
+      <button class="rate one"><i class="fa-solid fa-star"></i></button>
+      <button class="rate two"><i class="fa-solid fa-star"></i></button>
+      <button class="rate three"><i class="fa-solid fa-star"></i></button>
+      <button class="rate four"><i class="fa-solid fa-star"></i></button>
+      <button class="rate five"><i class="fa-solid fa-star"></i></button>
+    </div>
+    <textarea name="text" class="text" placeholder="Share your reviews here..." aria-placeholder="vvhjgjhg"></textarea>
+    <span><button id="post"><i class="fa-solid fa-paper-plane fa-rotate-by"
+          style="--fa-rotate-angle: 45deg;"></i></button> <button id="emoji-btn"><i
+          class="fa-solid fa-face-grin-stars"></i></button> <button><i class="fa-solid fa-link"></i></button>
+      <button><i class="fa-solid fa-language"></i></button>
+      <button><i class="fa-brands fa-creative-commons-share"></i></button>
+      <button><i class="fa-solid fa-flag"></i></button>
+      <button><i class="fa-regular fa-flag"></i></button>
+      <button><i class="fa-regular fa-bookmark"></i></button>
+      <button><i class="fa-solid fa-ban"></i></button>
+      <button><i class="fa-solid fa-bookmark"></i></button>
+      <button><i class="fa-solid fa-star-half-stroke"></i></button>
+      <button><i class="fa-solid fa-address-book"></i></button>
+      <button></button>
+      <button><i class="fa-solid fa-thumbs-up"></i></button>
+      <button><i class="fa-regular fa-thumbs-up"></i></button>
+      <button><i class="fa-regular fa-thumbs-down"></i></button>
+      <button><i class="fa-solid fa-thumbs-down"></i></button>
+      <button><i class="fa-solid fa-reply"></i></button>
+      <button><i class="fa-solid fa-circle-info"></i></button>
+    </span>
+  </div>
+  <p id="time"></p>
+  <div class="comments"></div>
+</body>
+<script type="module">
+  import { Picker } from 'https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js';
+  const text = document.getElementsByClassName("text")[0];
+  const send = document.getElementById("post");
+  const comments = document.querySelector(".comments");
+  const emojiBtn = document.getElementById("emoji-btn");
+
+  //const emojiPicker = new EmojiButton({
+  //  position: 'top-start'
+  //});
+  //
+  //const emojiBtn = document.getElementById("emoji-btn");
+  ////const textarea = document.querySelector(".text");
+  //
+  //emojiBtn.addEventListener("click", () => {
+  //  emojiPicker.togglePicker(emojiBtn);
+  //});
+  //
+  //emojiPicker.on("emoji", emoji => {
+  //  text.value += emoji;
+  //});
+  const picker = new Picker();
+  picker.style.position = 'absolute';
+  picker.style.display = 'none';
+  document.body.appendChild(picker);
+
+  picker.addEventListener('emoji-click', (event) => {
+    text.value += event.detail.unicode;
+  });
+
+  // Toggle emoji picker
+  emojiBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isVisible = picker.style.display === 'block';
+    picker.style.display = isVisible ? 'none' : 'block';
+
+    // Position near button
+    const rect = emojiBtn.getBoundingClientRect();
+    picker.style.left = rect.left + 'px';
+    picker.style.top = (rect.bottom + 5) + 'px';
+  });
+
+  document.addEventListener("click", () => {
+  picker.style.display = "none";
+});  
+
+
+  let countstar = 0;
+  document.querySelectorAll(".rate").forEach((btn, index) => {
+    btn.addEventListener("click", () => {
+      countstar = index + 1;
+      updatestart(countstar);
+    });
+  })
+
+  function updatestart(rates) {
+    document.querySelectorAll(".rate i").forEach((star, i) => {
+      star.style.color = i < rates ? "gold" : "green";
+      //  star.style.backgroundColor = "none"
+    });
+  }
+
+    let emptytext = false;
+
+    text.addEventListener("input",()=>{
+      emptytext = text.value.trim().length > 0;
+    })
+
+  function sendmessage() {
+    const reviews = text.value.trim();
+    if (reviews === "") return;
+
+    const overalluser = document.createElement("div");
+    overalluser.className = "overalluser";
+
+    const profile = document.createElement("span");
+    profile.className = "profile";
+
+    const review = document.createElement("div");
+    review.innerText = reviews;
+    review.className = "review";
+
+    const time = document.createElement("div");
+    time.className = "time";
+    time.dataset.time = time.toISOString();
+    time.innerText = "Just now";
+
+    //const timestamp = new Date();
+    updatestatus(time);
+
+    const totaltran = document.createElement("div");
+    totaltran.className = "totaltran";
+
+    const allbutton = document.createElement("span");
+    allbutton.id = "allbtn";
+
+    const translateBtn = document.createElement("button");
+    translateBtn.id = "translate";
+    translateBtn.innerHTML = '<i class="fa-solid fa-language"></i>';
+
+    const like = document.createElement("button");
+    like.id = "likebtn";
+    like.innerHTML = '<i class="fa-regular fa-thumbs-up"></i>';
+
+    const dislike = document.createElement("button");
+    dislike.id = "dislikebtn";
+    dislike.innerHTML = '<i class="fa-regular fa-thumbs-down"></i>';
+
+    const reply = document.createElement("button");
+    reply.id = "replybtn";
+    reply.innerHTML = '<i class="fa-solid fa-reply"></i>';
+
+    const lanstatus = document.createElement("p");
+    lanstatus.className = "lanstatus";
+    lanstatus.innerHTML = `<b>Available</b>`;
+
+    const uppersec = document.createElement("div");
+    uppersec.id = "uppersec";
+
+    const allrate = document.createElement("div");
+    allrate.className = "rating-display";
+
+    const secopt = document.createElement("div");
+    secopt.id = "secopt";
+    secopt.innerHTML = '<i class="fa-solid fa-ellipsis-vertical"></i>'
+
+    
+
+
+    const extrabtn = document.createElement("div");
+    extrabtn.id = "extrabtn";
+    extrabtn.innerHTML = `
+        <button class="inextra"><i class="fa-regular fa-flag"></i><span>Mark</span></button>
+        <button class="inextra"><i class="fa-solid fa-address-book"></i><span>Reviewbook</span></button>
+        <button class="inextra"><i class="fa-solid fa-ban"></i><span>Report</span></button>
+        <button class="inextra"><i class="fa-solid fa-bookmark"></i><span>Save</span></button>
+        <button class="inextra"><i class="fa-solid fa-marker"></i><span>Feedback</span></button>
+        <button class="inextra"><i class="fa-solid fa-circle-info"></i><span>info</span></button>
+        `;
+
+        secopt.addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.querySelectorAll("#extrabtn").forEach(sth => {
+        if (sth !== extrabtn)
+          sth.classList.remove("show");
+
+      });
+
+      extrabtn.classList.toggle("show");
+    })
+
+    document.addEventListener("click", () => {
+      document.querySelectorAll("#extrabtn").forEach(box => {
+        box.classList.remove("show");
+      });
+    });
+
+    for (let index = 0; index < 5; index++) {
+      //  const element = array[index];
+      const star = document.createElement("i");
+      star.className = "fa-solid fa-star";
+      // const sel = updatestart(rates);
+      star.style.color = index < countstar ? "gold" : "green";
+      star.style.fontSize = "18px";
+      star.style.backgroundColor = "transparent";
+      //  star.style.display = "flex";
+      //  star.style.justifyContent = "center";
+      //  star.style.alignItems="center";
+      //  star.style.flexDirection="row";
+      allrate.appendChild(star);
+    }
+
+    overalluser.appendChild(uppersec);
+    overalluser.appendChild(review);
+    overalluser.appendChild(totaltran);
+    overalluser.appendChild(time);
+    // overalluser.appendChild(like);
+    // overalluser.appendChild(dislike);
+    // overalluser.appendChild(reply);
+    overalluser.appendChild(allbutton);
+    uppersec.appendChild(allrate);
+    uppersec.appendChild(secopt);
+    uppersec.appendChild(extrabtn);
+
+    allbutton.appendChild(like);
+    allbutton.appendChild(dislike);
+    allbutton.appendChild(reply);
+    totaltran.appendChild(translateBtn);
+    totaltran.appendChild(lanstatus);
+    comments.prepend(overalluser);
+
+    text.value = "";
+    emptytext = false;
+  }
+
+
+  window.addEventListener("beforeunload", (e) => {
+  if (!emptytext) return;
+
+  e.preventDefault();
+  e.returnValue = ""; 
+});
+ 
+  send.addEventListener("click", sendmessage);
+  text.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendmessage();
+    }
+  })
+  function updatestatus(time) {
+   function update(){
+      const usertime = new Date(time.dataset.usertime);
+      const curr = new Date();
+      const calct = Math.floor((curr-usertime)/1000);
+
+      if(calct < 5){;
+      time.innerText="Just Now";
+      }
+      else if(calct < 60) {
+     time.innerText=`${time} sec ago`;
+      }
+      else if
+
+   }
+   setInterval(() => {
+    update
+   }, 1000);
+  }
+
+
+  async function translateall(text) {
+    try {
+      const res = await fetch(
+        `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text)}`
+      );
+
+      if (!res.ok) throw new Error('Translation failed');
+      const data = await res.json();
+
+      // Extract the translated text from the response
+      const translatedText = data[0].map(item => item[0]).join('');
+      return translatedText;
+    } catch (error) {
+      console.error("Translation error:", error);
+      return text;
+    }
+  }
+
+  document.addEventListener("click", async (e) => {
+    const btn = e.target.closest(".translate"); // closest = upward
+    //   const trans = btn.parentElement.querySelector(".lanstatus"); // 
+    if (!btn) return;
+
+    const card = btn.closest(".overalluser");//?.querySelector(".review");
+    const review = card.querySelector(".review");
+    const status = card.querySelector(".lanstatus");
+    if (!review) return;
+
+    btn.disabled = true;
+    trans.innerText = "translating...";
+
+    const translated = await translateall(review.innerText);
+    review.innerText = translated;
+
+    // btn.innerHTML = "";
+    trans.innerText = "Translated"
+    setTimeout(() => {
+      trans.innerHTML = `<b>Available</b>`;
+    }, 3000);
+    btn.disabled = false;
+  })
+  function updateTime() {
+    const now = new Date();
+
+    let hours = now.getHours();
+    const ampm = hours >= 12 ? "PM" : "AM";
+
+    hours = hours % 12 || 12;  // 0 % 12 || 12  give 12  as no 0 hour it will be show 12 and 13% 12 = 1 hour 
+    let minutes = now.getMinutes().toString().padStart(2, "0");
+    let seconds = now.getSeconds().toString().padStart(2, "0");
+
+    document.getElementById("time").innerText =
+      `${hours}:${minutes}:${seconds} ${ampm}`;
+  }
+
+  setInterval(updateTime, 1000);
+  updateTime();
+</script>
+
+</html>
