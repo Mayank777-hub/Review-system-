@@ -103,14 +103,21 @@
     }
 
     .review {
-      color: whitesmoke;
-      border: 1px solid yellow;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: start;
-      background-color: rgb(110, 96, 216);
-      margin-top: 10px;
+  color: whitesmoke;
+  border: 1px solid rgba(181, 176, 176, 0.349);
+  background-color: rgb(110, 96, 216);
+
+  max-width: 287px;
+  padding: 6px;
+
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+
+  display: block;
+  margin-top: 50px;
+  position: absolute;
+  margin-left: 5px;
     }
 
     .time {
@@ -124,7 +131,7 @@
       justify-content: center;
       align-items: center;
       position: absolute;
-      margin-top: 95px;
+      margin-top: 125px;
       margin-left: 80%;
       font-size: 10px;
     }
@@ -136,29 +143,31 @@
 
     .totaltran {
       width: 30px;
-      height: 17px;
+      height: 40px;
       background-color: rgb(78, 66, 203);
-      margin-top: 90px;
-      position: absolute;
+       display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 9px;
+  flex-direction: column;
+   position: static;   
     }
 
-    #translate,
-    #likebtn,
-    #dislikebtn,
-    #replybtn {
-      width: 25px;
-      height: 15px;
-      background-color: rgb(78, 66, 203);
-      color: white;
-    }
-
+    
     #likebtn,
     #dislikebtn,
     #replybtn {
       width: 3vw;
       height: 3vh;
+      background-color: rgb(78, 66, 203);
+      color: white;
     }
-
+   #translate{
+    height: 180px;
+     width: 3vw;
+      background-color: rgb(78, 66, 203);
+      color: white;
+   }
     .fa-language {
       color: white;
       border: rgb(78, 66, 203);
@@ -166,6 +175,9 @@
 
     .lanstatus {
       font-size: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: start;
     }
 
     .rating {
@@ -207,8 +219,10 @@
     #allbtn {
       display: flex;
       justify-content: space-around;
-      width: 100px;
-      height: 10px;
+      width: 130px;
+      height: 30px;
+      position: absolute;
+      margin-top: 14vh;
     }
 
     #uppersec {
@@ -471,7 +485,6 @@
 
     overalluser.appendChild(uppersec);
     overalluser.appendChild(review);
-    overalluser.appendChild(totaltran);
     overalluser.appendChild(time);
     // overalluser.appendChild(like);
     // overalluser.appendChild(dislike);
@@ -483,7 +496,9 @@
 
     allbutton.appendChild(like);
     allbutton.appendChild(dislike);
+
     allbutton.appendChild(reply);
+     allbutton.appendChild(totaltran);
     totaltran.appendChild(translateBtn);
     totaltran.appendChild(lanstatus);
     comments.prepend(overalluser);
