@@ -115,9 +115,9 @@
   white-space: pre-wrap;
 
   display: block;
-  margin-top: 50px;
-  position: absolute;
+  position: static;
   margin-left: 5px;
+  margin-right: 5px;
     }
 
     .time {
@@ -130,10 +130,11 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      position: absolute;
-      margin-top: 125px;
+      position: static;
       margin-left: 80%;
       font-size: 10px;
+      align-self: flex-end;
+      margin-top: 5px;
     }
 
     emoji-picker,
@@ -144,7 +145,7 @@
     .totaltran {
       width: 30px;
       height: 40px;
-      background-color: rgb(78, 66, 203);
+      background-color: none;
        display: flex;
   align-items: center;
   gap: 5px;
@@ -163,10 +164,10 @@
       color: white;
     }
    #translate{
-    height: 180px;
+    height: 185px;
      width: 3vw;
       background-color: rgb(78, 66, 203);
-      color: white;
+      color: white; 
    }
     .fa-language {
       color: white;
@@ -178,7 +179,11 @@
       display: flex;
       justify-content: center;
       align-items: start;
+      color: white;
+      background-color: transparent;
+      padding-bottom: 2px;
     }
+    
 
     .rating {
       display: flex;
@@ -221,8 +226,9 @@
       justify-content: space-around;
       width: 130px;
       height: 30px;
-      position: absolute;
-      margin-top: 14vh;
+      position: static;
+      margin-top: 5px;
+      margin-bottom: 5px;
     }
 
     #uppersec {
