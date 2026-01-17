@@ -1,0 +1,270 @@
+* {
+      /*toLocaleTimeString() = 12:12:12 */
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(to left, black, rgb(1, 1, 91), black);
+    }
+
+    .commentb {
+      width: 80vw;
+      height: 40vh;
+      border: 1px solid white;
+      margin: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      flex-direction: column;
+    }
+
+    .commentb h3 {
+      color: yellow;
+      margin-left: 30vw;
+    }
+
+    #time {
+      color: white;
+    }
+
+    textarea {
+      resize: none;
+      width: 40vw;
+      height: 25vh;
+      margin-left: 30vw;
+      font-family: Arial, sans-serif;
+      outline: none;
+      background-color: lab(100% 0.01 -0.01);
+      color: black;
+      text-align: left;
+      font-size: medium;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    textarea:focus {
+      background-color: rgb(255, 255, 255);
+      border: 3px solid yellow;
+      border-color: yellow;
+      box-shadow: 2px 2px 2px 2px rgb(195, 237, 7);
+    }
+
+    textarea::placeholder {
+      color: red;
+      text-align: center;
+      align-items: center;
+      padding: 13vh;
+      font-size: larger;
+      font-style: italic;
+    }
+
+    textarea:focus::placeholder {
+      color: transparent;
+    }
+
+    .comments {
+      overflow-y: auto;
+      width: 80vw;
+      border: 1px solid white;
+      margin: auto;
+      color: white;
+    }
+
+    .overalluser {
+      background-color: rgb(36, 36, 98);
+      color: whitesmoke;
+      width: 300px;
+      height: auto;
+      margin-top: 5px;
+      min-height: 150px;
+      border: 1px solid yellow;
+      margin-left: 5px;
+      margin-bottom: 5px;
+      position: relative;
+      border-radius: 5px;
+      display: flex;
+      align-items: start;
+      flex-direction: column;
+      flex-wrap: wrap;
+      text-align: center;
+    }
+
+    .review {
+  color: whitesmoke;
+  border: 1px solid rgba(181, 176, 176, 0.349);
+  background-color: rgb(110, 96, 216);
+
+  max-width: 287px;
+  padding: 6px;
+
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+
+  display: block;
+  position: static;
+  margin-left: 5px;
+  margin-right: 5px;
+    }
+
+    .time {
+      color: yellow;
+      height: 17px;
+      width: 50px;
+      background-color: rgb(78, 66, 203);
+      border: 1px solid rgb(200, 158, 158);
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: static;
+      margin-left: 80%;
+      font-size: 10px;
+      align-self: flex-end;
+      margin-top: 5px;
+    }
+
+    emoji-picker,
+    .emoji-picker {
+      z-index: 99999 !important;
+    }
+
+    .totaltran {
+      width: 30px;
+      height: 40px;
+      background-color: none;
+       display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 9px;
+  flex-direction: column;
+   position: static;   
+    }
+
+    
+    #likebtn,
+    #dislikebtn,
+    #replybtn {
+      width: 3vw;
+      height: 3vh;
+      background-color: rgb(78, 66, 203);
+      color: white;
+    }
+   #translate{
+    height: 185px;
+     width: 3vw;
+      background-color: rgb(78, 66, 203);
+      color: white; 
+   }
+    .fa-language {
+      color: white;
+      border: rgb(78, 66, 203);
+    }
+
+    .lanstatus {
+      font-size: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: start;
+      color: white;
+      background-color: transparent;
+      padding-bottom: 2px;
+    }
+    
+
+    .rating {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 40vw;
+      height: 7vh;
+      background-color: rgb(0, 0, 0);
+      margin-left: 37.6%;
+    }
+
+    .rate {
+      background-color: rgb(0, 0, 0);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: row;
+    }
+
+    .fa-star {
+      color: yellow;
+      background-color: rgb(0, 0, 0);
+      width: 35px;
+      height: 35px;
+      font-size: 30px;
+    }
+
+    .rating-display {
+      background-color: transparent;
+      position: relative;
+      display: flex;
+      gap: 0px;
+      justify-content: center;
+      align-items: center;
+      margin-top: 15px;
+    }
+
+    #allbtn {
+      display: flex;
+      justify-content: space-around;
+      width: 130px;
+      height: 30px;
+      position: static;
+      margin-top: 5px;
+      margin-bottom: 5px;
+    }
+
+    #uppersec {
+      display: flex;
+      justify-content: space-between;
+      flex-direction: row;
+      background-color: black;
+      align-items: center;
+      width: 19vw;
+      margin: auto;
+      margin-top: 0px;
+      position: relative;
+    }
+
+    #extrabtn {
+  position: absolute;
+  top: 17px;
+  right: -68px;
+  width: 120px;
+  background: #0f172a;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.95);
+  opacity: 0;
+  transition: all 0.18s ease;
+  z-index: 999;
+}
+
+#extrabtn.show {
+  display: flex;
+  transform: scale(1);
+  opacity: 1;
+}
+
+#extrabtn:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.inextra{
+  display: flex;
+  justify-content:stretch;
+}
+.fa-flag,.fa-ban,.fa-bookmark,.fa-address-book,.fa-circle-info,.fa-marker{
+  margin-right: 5px;
+  margin-left: 5px;
+  margin-top: 2px;
+}
