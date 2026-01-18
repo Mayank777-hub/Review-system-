@@ -273,3 +273,6 @@
   max-height: 200px;
   object-fit: cover;
 }
+#error{
+  color: red;
+}

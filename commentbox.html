@@ -21,7 +21,7 @@
       <button class="rate five"><i class="fa-solid fa-star"></i></button>
     </div>
     <textarea name="text" class="text" placeholder="Share your reviews here..." aria-placeholder="vvhjgjhg"></textarea>
-    <input type="file" name="" id="fileallup" accept="image/*,video/*" hidden>
+    <input type="file" name="media" id="fileallup" accept="image/*,video/*" hidden>
     <span><button id="post"><i class="fa-solid fa-paper-plane fa-rotate-by"
           style="--fa-rotate-angle: 45deg;"></i></button> <button id="emoji-btn"><i
           class="fa-solid fa-face-grin-stars"></i></button> <button id="fileup"><i class="fa-solid fa-link"></i></button>
@@ -42,6 +42,7 @@
       <button><i class="fa-solid fa-reply"></i></button>
       <button><i class="fa-solid fa-circle-info"></i></button>
     </span>
+    <div id="error"></div>
   </div>
   <p id="time"></p>
   <div class="comments"></div>
@@ -54,6 +55,7 @@
   const emojiBtn = document.getElementById("emoji-btn");
   const uploadup = document.getElementById("fileup");
   const uploadallup = document.getElementById("fileallup");
+  const showerr = document.getElementById("error");
 
   let selectmedia = null;
 
@@ -62,11 +64,28 @@
   })
 
   uploadallup.addEventListener("change",()=>{
-    const file = uploadallup.files[0];
-    if(!file) return ;
-    selectmedia = file;
-  })
+   const file = uploadallup.files[0];
+  if (!file) return;
 
+  const filesize = file.size / (1024 * 1024);
+
+  if (file.type.startsWith("image/") && filesize > 50) {
+    showerr.textContent = "Image must be under 50MB";
+    uploadallup.value = "";
+    selectmedia = null;
+    return;
+  }
+
+  if (file.type.startsWith("video/") && filesize > 150) {
+    showerr.textContent = "Video must be under 150MB";
+    uploadallup.value = "";
+    selectmedia = null;
+    return;
+  }
+
+  showerr.textContent = "";
+  selectmedia = file;
+  })
   //const emojiPicker = new EmojiButton({
   //  position: 'top-start'
   //});
@@ -130,7 +149,7 @@
 
   function sendmessage() {
     const reviews = text.value.trim();
-    if (reviews === "") return;
+    if (!reviews && !selectmedia) return;
 
     const overalluser = document.createElement("div");
     overalluser.className = "overalluser";
@@ -153,7 +172,7 @@ if(selectmedia){
     mediaElement.style.borderRadius = "6px";
     mediaElement.style.marginTop = "5px";
     }
-    else if (selectedMedia.type.startsWith("video")) {
+    else if (selectmedia.type.startsWith("video")) {
     mediaElement = document.createElement("video");
     mediaElement.src = url;
     mediaElement.controls = true;
