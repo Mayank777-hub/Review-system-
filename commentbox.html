@@ -7,9 +7,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
     integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="commentstyle.css">
+  <link rel="stylesheet" href="commentstyle.css">
   <title>Document</title>
 </head>
+
 <body>
   <div class="commentb">
     <h3>Reviews</h3>
@@ -22,9 +23,18 @@
     </div>
     <textarea name="text" class="text" placeholder="Share your reviews here..." aria-placeholder="vvhjgjhg"></textarea>
     <input type="file" name="media" id="fileallup" accept="image/*,video/*" hidden>
+    <select name="" id="">
+      <option value="" disabled selected hidden>OverallExperience</option>
+      <option value="Outstanding">Outstanding</option>
+      <option value="Good">Good</option>
+      <option value="Neutral">Neutral</option>
+      <option value="Bad">Bad</option>
+      <option value="Worst">Worst</option>
+    </select>
     <span><button id="post"><i class="fa-solid fa-paper-plane fa-rotate-by"
           style="--fa-rotate-angle: 45deg;"></i></button> <button id="emoji-btn"><i
-          class="fa-solid fa-face-grin-stars"></i></button> <button id="fileup"><i class="fa-solid fa-link"></i></button>
+          class="fa-solid fa-face-grin-stars"></i></button> <button id="fileup"><i
+          class="fa-solid fa-link"></i></button>
       <button><i class="fa-solid fa-language"></i></button>
       <button><i class="fa-brands fa-creative-commons-share"></i></button>
       <button><i class="fa-solid fa-flag"></i></button>
@@ -32,7 +42,7 @@
       <button><i class="fa-regular fa-bookmark"></i></button>
       <button><i class="fa-solid fa-ban"></i></button>
       <button><i class="fa-solid fa-bookmark"></i></button>
-      <button><i class="fa-solid fa-star-half-stroke"></i></button>;/
+      <button><i class="fa-solid fa-star-half-stroke"></i></button>;
       <button><i class="fa-solid fa-address-book"></i></button>
       <button></button>
       <button><i class="fa-solid fa-thumbs-up"></i></button>
@@ -49,6 +59,7 @@
 </body>
 <script type="module">
   import { Picker } from 'https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js';
+  // const cors = require()
   const text = document.getElementsByClassName("text")[0];
   const send = document.getElementById("post");
   const comments = document.querySelector(".comments");
@@ -56,35 +67,37 @@
   const uploadup = document.getElementById("fileup");
   const uploadallup = document.getElementById("fileallup");
   const showerr = document.getElementById("error");
+  const mainapi = "http://localhost:3900/Fooditems";
+  const FoodID = '69412726afe89352da675468'; // doraemon Milk cookies
 
   let selectmedia = null;
 
-  uploadup.addEventListener("click",()=>{
+  uploadup.addEventListener("click", () => {
     uploadallup.click();
   })
 
-  uploadallup.addEventListener("change",()=>{
-   const file = uploadallup.files[0];
-  if (!file) return;
+  uploadallup.addEventListener("change", () => {
+    const file = uploadallup.files[0];
+    if (!file) return;
 
-  const filesize = file.size / (1024 * 1024);
+    const filesize = file.size / (1024 * 1024);
 
-  if (file.type.startsWith("image/") && filesize > 50) {
-    showerr.textContent = "Image must be under 50MB";
-    uploadallup.value = "";
-    selectmedia = null;
-    return;
-  }
+    if (file.type.startsWith("image/") && filesize > 50) {
+      showerr.textContent = "Image must be under 50MB";
+      uploadallup.value = "";
+      selectmedia = null;
+      return;
+    }
 
-  if (file.type.startsWith("video/") && filesize > 150) {
-    showerr.textContent = "Video must be under 150MB";
-    uploadallup.value = "";
-    selectmedia = null;
-    return;
-  }
+    if (file.type.startsWith("video/") && filesize > 150) {
+      showerr.textContent = "Video must be under 150MB";
+      uploadallup.value = "";
+      selectmedia = null;
+      return;
+    }
 
-  showerr.textContent = "";
-  selectmedia = file;
+    showerr.textContent = "";
+    selectmedia = file;
   })
   //const emojiPicker = new EmojiButton({
   //  position: 'top-start'
@@ -122,8 +135,8 @@
   });
 
   document.addEventListener("click", () => {
-  picker.style.display = "none";
-});  
+    picker.style.display = "none";
+  });
 
 
   let countstar = 0;
@@ -141,46 +154,138 @@
     });
   }
 
-    let emptytext = false;
+  let emptytext = false;
 
-    text.addEventListener("input",()=>{
-      emptytext = text.value.trim().length > 0;
-    })
+  text.addEventListener("input", () => {
+    emptytext = text.value.trim().length > 0;
+  })
 
-  function sendmessage() {
+  async function sendmessage() {
     const reviews = text.value.trim();
-    if (!reviews && !selectmedia) return;
-
+    const selectexperience = document.querySelector('select').value;
+    if (!reviews.trim()) {
+      showerr.textContent="Review cannot be empty";
+      return;
+    }
+    if (!selectexperience) {
+      showerr.textContent = "Please share your experience";
+      return;
+    }
     const overalluser = document.createElement("div");
     overalluser.className = "overalluser";
 
     const profile = document.createElement("span");
     profile.className = "profile";
 
+
+
     const review = document.createElement("div");
     review.innerText = reviews;
     review.className = "review";
+     
+    let mediaarr = [];
+    if(selectmedia){
+    const uploaddata = new FormData();
+    uploaddata.append("media",selectmedia);
+
+    const uploadres = await fetch("http://localhost:3290/upload",{
+      method:"POST",
+      body:uploadres
+    });
+
+    const media = await uploadres.json();
+    mediaarr.push(media);
+  }
+
+    const reviewData = {
+      //ReviewProfileImage: ReviewProfileImage,
+      ReviewerName: "Anonymous",
+      Rating: countstar,
+      Review: reviews,
+      Overallexperience: selectexperience,
+      ReviewMedia:mediaarr
+    };
+
+    const img = document.createElement("img");
+    img.src = "http://localhost:3900/uploads/1.png";
+    img.alt = "profile";
+    img.className = "profile-img";
+
+    try {
+      send.disabled = true;
+      send.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+      const sendmess = await fetch(`${mainapi}/${FoodID}/review`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reviewData)
+      });
+
+      if (!sendmess.ok) {
+        throw new Error("Something cause Server to disrupt or send review");
+      }
+
+      const result = await sendmess.json();
+      console.log('Review Uploaded successfully', sendmess);
+
+      // createreview(reviewData);
+
+      text.value = "";
+      document.querySelector('select').selectedIndex = 0;
+      countstar = 0;
+      updatestart(0);
+      selectmedia = null;
+      uploadallup.value = "";
+      emptytext = false;
+      showerr.textContent = "";
+
+      showSuccess("Review submitted successfully");
+
+    } catch (error) {
+      console.error("There is something wrong with Internet", error);
+      showerr.textContent = "Server slow try again later."
+    }
+    finally {
+      send.disabled = false;
+      send.innerHTML = '<i class="fa-solid fa-paper-plane fa-rotate-by" style="--fa-rotate-angle: 45deg;"></i>';
+    }
 
     let mediaElement = null;
-if(selectmedia){
-    const url = URL.createObjectURL(selectmedia);
+    if (selectmedia) {
+      const url = URL.createObjectURL(selectmedia);
 
-    if(selectmedia.type.startsWith("image")){
-    mediaElement = document.createElement("img");
-    mediaElement.src = url;
-    mediaElement.style.maxWidth = "100%";
-    mediaElement.style.borderRadius = "6px";
-    mediaElement.style.marginTop = "5px";
+      if (selectmedia.type.startsWith("image")) {
+        mediaElement = document.createElement("img");
+        mediaElement.src = url;
+        mediaElement.style.maxWidth = "100%";
+        mediaElement.style.borderRadius = "6px";
+        mediaElement.style.marginTop = "5px";
+      }
+      else if (selectmedia.type.startsWith("video")) {
+        mediaElement = document.createElement("video");
+        mediaElement.src = url;
+        mediaElement.controls = true;
+        mediaElement.style.maxWidth = "100%";
+        mediaElement.style.marginTop = "5px";
+      }
     }
-    else if (selectmedia.type.startsWith("video")) {
-    mediaElement = document.createElement("video");
-    mediaElement.src = url;
-    mediaElement.controls = true;
-    mediaElement.style.maxWidth = "100%";
-    mediaElement.style.marginTop = "5px";
-  }
+
+    
+    if (review.ReviewMedia?.length) {
+  review.ReviewMedia.forEach(media => {
+    if (media.type === "image") {
+      const img = document.createElement("img");
+      img.src = media.url;
+      overalluser.appendChild(img);
+    } else {
+      const video = document.createElement("video");
+      video.src = media.url;
+      video.controls = true;
+      overalluser.appendChild(video);
+    }
+  });
 }
-     
 
     const time = document.createElement("div");
     time.className = "time";
@@ -226,7 +331,7 @@ if(selectmedia){
     secopt.id = "secopt";
     secopt.innerHTML = '<i class="fa-solid fa-ellipsis-vertical"></i>'
 
-    
+
 
 
     const extrabtn = document.createElement("div");
@@ -240,7 +345,7 @@ if(selectmedia){
         <button class="inextra"><i class="fa-solid fa-circle-info"></i><span>info</span></button>
         `;
 
-        secopt.addEventListener("click", (e) => {
+    secopt.addEventListener("click", (e) => {
       e.stopPropagation();
       document.querySelectorAll("#extrabtn").forEach(sth => {
         if (sth !== extrabtn)
@@ -262,7 +367,7 @@ if(selectmedia){
       const star = document.createElement("i");
       star.className = "fa-solid fa-star";
       // const sel = updatestart(rates);
-      star.style.color = index < countstar ? "gold" : "green";
+      star.style.color = index < countstar ? "gold" : "gray";
       star.style.fontSize = "18px";
       star.style.backgroundColor = "transparent";
       //  star.style.display = "flex";
@@ -272,17 +377,23 @@ if(selectmedia){
       allrate.appendChild(star);
     }
 
+
+
+
+    profile.appendChild(img);
+   // overalluser.appendChild(profile);
     overalluser.appendChild(uppersec);
     overalluser.appendChild(review);
     if (mediaElement) {
-  overalluser.appendChild(mediaElement);
-}
+      overalluser.appendChild(mediaElement);
+    }
 
     overalluser.appendChild(time);
     // overalluser.appendChild(like);
     // overalluser.appendChild(dislike);
     // overalluser.appendChild(reply);
     overalluser.appendChild(allbutton);
+    uppersec.appendChild(profile);
     uppersec.appendChild(allrate);
     uppersec.appendChild(secopt);
     uppersec.appendChild(extrabtn);
@@ -291,7 +402,7 @@ if(selectmedia){
     allbutton.appendChild(dislike);
 
     allbutton.appendChild(reply);
-     allbutton.appendChild(totaltran);
+    allbutton.appendChild(totaltran);
     totaltran.appendChild(translateBtn);
     totaltran.appendChild(lanstatus);
     comments.prepend(overalluser);
@@ -302,12 +413,12 @@ if(selectmedia){
 
 
   window.addEventListener("beforeunload", (e) => {
-  if (!emptytext) return;
+    if (!emptytext) return;
 
-  e.preventDefault();
-  e.returnValue = ""; 
-});
- 
+    e.preventDefault();
+    e.returnValue = "";
+  });
+
   send.addEventListener("click", sendmessage);
   text.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -315,42 +426,64 @@ if(selectmedia){
       sendmessage();
     }
   })
+  function showSuccess(message) {
+    const successpop = document.createElement("div");
+    successpop.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #4CAF50;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 1000;
+  `;
+    successpop.textContent = message;
+    document.body.appendChild(successpop);
+
+    setTimeout(() => {
+      successpop.remove();
+    }, 3000);
+
+  }
   function updatestatus(time) {
-   function update(){
+    function update() {
       const createdAt = new Date(time.dataset.createdAt);
       const curr = new Date();
-      const calct = Math.floor((curr - createdAt)/1000);
+      const calct = Math.floor((curr - createdAt) / 1000);
 
-      if(calct < 5){;
-      time.innerText="Just Now";
+      if (calct < 5) {
+        ;
+        time.innerText = "Just Now";
       }
-      else if(calct < 60) {
-     time.innerText=`${calct} sec`;
+      else if (calct < 60) {
+        time.innerText = `${calct} sec`;
       }
-      else if(calct < 3600){
-        time.innerText =`${Math.floor(calct/60)} min`;
+      else if (calct < 3600) {
+        time.innerText = `${Math.floor(calct / 60)} min`;
       }
-      else if(calct < 86400){
-        time.innerText = `${Math.floor(calct/3600)} hour`;
+      else if (calct < 86400) {
+        time.innerText = `${Math.floor(calct / 3600)} hour`;
       }
-       else if (calct < 86400* 2){
-      time.innerText = 'Yesterday';
-     }
-     else if(calct < 604800){
-      time.innerText = `${Math.floor(calct/86400)} days`; //2592000 : 30 days, YEAR: 31536000
-     }
-     else if(calct <2592000){
-      time.innerText = `${Math.floor(calct/86400)} week`;
-     }
-     else if(calct < 31536000){
-      time.innerText =`${Math.floor(calct/2592000)} month`;
-     }
-     else {
-      time.innerText = `${Math.floor(calct/31536000)} years`;
+      else if (calct < 86400 * 2) {
+        time.innerText = 'Yesterday';
+      }
+      else if (calct < 604800) {
+        time.innerText = `${Math.floor(calct / 86400)} days`; //2592000 : 30 days, YEAR: 31536000
+      }
+      else if (calct < 2592000) {
+        time.innerText = `${Math.floor(calct / 86400)} week`;
+      }
+      else if (calct < 31536000) {
+        time.innerText = `${Math.floor(calct / 2592000)} month`;
+      }
+      else {
+        time.innerText = `${Math.floor(calct / 31536000)} years`;
+      }
     }
-   }
     update();
-   setInterval(update,1000);
+    setInterval(update, 1000);
   }
 
 
@@ -371,6 +504,36 @@ if(selectmedia){
       return text;
     }
   }
+
+
+  async function loadExistingReviews() {
+    try {
+      const response = await fetch(`${mainapi}/${FoodID}/reviews`);
+      if (!response.ok) throw new Error('Failed to load reviews');
+
+      const snack = await response.json();
+
+
+      if (snack.Reviewers_detail && snack.Reviewers_detail.length > 0) {
+        snack.Reviewers_detail
+          .filter(review => review.parentId === null) // Only top-level reviews
+          .reverse()
+          .forEach(review => {
+            createReviewElement({
+              ReviewerName: review.ReviewerName,
+              Rating: review.Rating,
+              Review: review.Review,
+              Overallexperience: review.Overallexperience
+            });
+          });
+      }
+    } catch (error) {
+      console.error('Error loading reviews:', error);
+    }
+  }
+
+
+  document.addEventListener('DOMContentLoaded', loadExistingReviews);
 
   document.addEventListener("click", async (e) => {
     const btn = e.target.closest("#translate"); // closest = upward

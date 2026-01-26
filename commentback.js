@@ -2,12 +2,24 @@ const multer = require("multer");
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const path = require("path");
 const PORT = 3290;
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
+const storeupload = multer.diskStorage({ 
+    destination:(req,file,cb)=>{
+        cb(null,"uploads/");
+    },
+    filename:(req,file,cb)=>{
+        const filename = Date.now() + "-" + file.originalname;
+        cb(null,filename);
+    }
+});
 const uploads = multer({
+    storeupload,
     limits : {
         fileSize: 150 * 1024 * 1024
     },
@@ -16,7 +28,7 @@ const uploads = multer({
         {
             cb(null,true);
         }else {
-            cb(new Error("Only jpg,jpgs,pngs,gif,mp4 can only be uploaded"));
+            cb(new Error("Only jpg,jpgs,pngs,gif,mp4 can  be upload"));
         }
     }
 });
@@ -25,7 +37,10 @@ app.get("/",(req,res)=>{
     res.status(200).json("Working perfectly");
 })
 app.post("/upload",uploads.single("media"),(req,res)=>{
-   res.status(200).send({msg:"File uploaded Successfully"});
+   res.status(200).json({
+    url:``,
+    msg:"File uploaded Successfully"
+});
 })
 
 app.use((err, req, res, next)=>{
