@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-
+// diskstorage is used for where to upload,name,time stamp add of file
 const storeupload = multer.diskStorage({ 
     destination:(req,file,cb)=>{
         cb(null,"uploads/");
