@@ -70,6 +70,11 @@
   const mainapi = "http://localhost:3900/Fooditems";
   const FoodID = '69412726afe89352da675468'; // doraemon Milk cookies
 
+  
+  //Picker.addEventListener("click", (e) => {
+//  //e.stopPropagation();
+//});
+
   let selectmedia = null;
 
   uploadup.addEventListener("click", () => {
@@ -117,6 +122,11 @@
   picker.style.position = 'absolute';
   picker.style.display = 'none';
   document.body.appendChild(picker);
+
+  picker.addEventListener("click", (e) => {
+  e.stopPropagation();
+});
+
 
   picker.addEventListener('emoji-click', (event) => {
     text.value += event.detail.unicode;
@@ -521,7 +531,7 @@
           .forEach(review => {
             createReviewElement({
               ReviewerName: review.ReviewerName,
-              Rating: review.Rating,
+              Rating: Number(review.Rating),
               Review: review.Review,
               Overallexperience: review.Overallexperience
             });
@@ -545,17 +555,22 @@
     const status = card.querySelector(".lanstatus");
     if (!review) return;
 
+    if(!review.dataset.original){
+      review.dataset.original = review.innerText;
+    }
     btn.disabled = true;
-    status.innerText = "translating...";
 
+   if (!review.dataset.translated) {
+    status.innerText = "translating...";
     const translated = await translateall(review.innerText);
     review.innerText = translated;
-
-    // btn.innerHTML = "";
-    status.innerText = "Translated"
-    setTimeout(() => {
-      status.innerHTML = `<b>Available</b>`;
-    }, 3000);
+    review.dataset.translated = "true";
+    status.innerText = "Translated";
+  } else {
+    review.innerText = review.dataset.original;
+    delete review.dataset.translated;
+    status.innerHTML = "<b>Available</b>";
+  }
     btn.disabled = false;
   })
   function updateTime() {
