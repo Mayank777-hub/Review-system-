@@ -169,7 +169,147 @@
   text.addEventListener("input", () => {
     emptytext = text.value.trim().length > 0;
   })
+   
+  function createReviewElement(reviewData, reviewId = null, createdAt = null) {
+    const overalluser = document.createElement("div");
+    overalluser.className = "overalluser";
+    if (reviewId) {
+      overalluser.dataset.reviewId = reviewId;
+    }
 
+    const uppersec = document.createElement("div");
+    uppersec.id = "uppersec";
+
+    const profile = document.createElement("span");
+    profile.className = "profile";
+
+    const img = document.createElement("img");
+    img.src = reviewData.ReviewProfileImage || "http://localhost:3900/uploads/1.png";
+    img.alt = "profile";
+    img.className = "profile-img";
+    profile.appendChild(img);
+
+    // Rating display gray if not selected 
+    const allrate = document.createElement("div");
+    allrate.className = "rating-display";
+    
+    const rating = Number(reviewData.Rating) || 0;
+    for (let index = 0; index < 5; index++) {
+      const star = document.createElement("i");
+      star.className = "fa-solid fa-star";
+      star.style.color = index < rating ? "gold" : "gray";
+      star.style.fontSize = "18px";
+      star.style.backgroundColor = "transparent";
+      allrate.appendChild(star);
+    }
+
+    // it provide hidden options like check info about user or mulple user.
+    const secopt = document.createElement("div");
+    secopt.id = "secopt";
+    secopt.innerHTML = '<i class="fa-solid fa-ellipsis-vertical"></i>';
+
+    const extrabtn = document.createElement("div");
+    extrabtn.id = "extrabtn";
+    extrabtn.innerHTML = `
+      <button class="inextra"><i class="fa-regular fa-flag"></i><span>Mark</span></button>
+      <button class="inextra"><i class="fa-solid fa-address-book"></i><span>Reviewbook</span></button>
+      <button class="inextra"><i class="fa-solid fa-ban"></i><span>Report</span></button>
+      <button class="inextra"><i class="fa-solid fa-bookmark"></i><span>Save</span></button>
+      <button class="inextra"><i class="fa-solid fa-marker"></i><span>Feedback</span></button>
+      <button class="inextra"><i class="fa-solid fa-circle-info"></i><span>info</span></button>
+    `;
+
+    secopt.addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.querySelectorAll("#extrabtn").forEach(sth => {
+        if (sth !== extrabtn) sth.classList.remove("show");
+      });
+      extrabtn.classList.toggle("show");
+    });
+
+    // Review text
+    const review = document.createElement("div");
+    review.innerText = reviewData.Review;
+    review.className = "review";
+
+    // Review media
+    if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
+      reviewData.ReviewMedia.forEach(media => {
+        if (media.type === "image") {
+          const img = document.createElement("img");
+          img.src = media.url;
+          img.style.maxWidth = "100%";
+          img.style.borderRadius = "6px";
+          img.style.marginTop = "5px";
+          overalluser.appendChild(img);
+        } else if (media.type === "video") {
+          const video = document.createElement("video");
+          video.src = media.url;
+          video.controls = true;
+          video.style.maxWidth = "100%";
+          video.style.marginTop = "5px";
+          overalluser.appendChild(video);
+        }
+      });
+    }
+
+    //  Freeze Time i used initially Just now 
+    const time = document.createElement("div");
+    time.className = "time";
+    time.dataset.createdAt = createdAt ? new Date(createdAt).toISOString() : new Date().toISOString();
+    time.innerText = "Just now";
+    updatestatus(time);
+
+    // Buttons colections 
+    const allbutton = document.createElement("span");
+    allbutton.id = "allbtn";
+
+    const like = document.createElement("button");
+    like.id = "likebtn";
+    like.innerHTML = '<i class="fa-regular fa-thumbs-up"></i>';
+
+    const dislike = document.createElement("button");
+    dislike.id = "dislikebtn";
+    dislike.innerHTML = '<i class="fa-regular fa-thumbs-down"></i>';
+
+    const reply = document.createElement("button");
+    reply.id = "replybtn";
+    reply.innerHTML = '<i class="fa-solid fa-reply"></i>';
+
+    // Translation lanstatus struct
+    const totaltran = document.createElement("div");
+    totaltran.className = "totaltran";
+
+    const translateBtn = document.createElement("button");
+    translateBtn.id = "translate";
+    translateBtn.innerHTML = '<i class="fa-solid fa-language"></i>';
+
+    const lanstatus = document.createElement("p");
+    lanstatus.className = "lanstatus";
+    lanstatus.innerHTML = `<b>Available</b>`;
+
+    // Dom manipulative structure
+    uppersec.appendChild(profile);
+    uppersec.appendChild(allrate);
+    uppersec.appendChild(secopt);
+    uppersec.appendChild(extrabtn);
+
+    overalluser.appendChild(uppersec);
+    overalluser.appendChild(review);
+    overalluser.appendChild(time);
+    
+    allbutton.appendChild(like);
+    allbutton.appendChild(dislike);
+    allbutton.appendChild(reply);
+    allbutton.appendChild(totaltran);
+    
+    totaltran.appendChild(translateBtn);
+    totaltran.appendChild(lanstatus);
+    
+    overalluser.appendChild(allbutton);
+
+    return overalluser;
+  }
   async function sendmessage() {
     const reviews = text.value.trim();
     const selectexperience = document.querySelector('select').value;
@@ -181,32 +321,35 @@
       showerr.textContent = "Please share your experience";
       return;
     }
-    const overalluser = document.createElement("div");
-    overalluser.className = "overalluser";
+    //const overalluser = document.createElement("div");
+    //overalluser.className = "overalluser";
+//
+    //const profile = document.createElement("span");
+    //profile.className = "profile";
 
-    const profile = document.createElement("span");
-    profile.className = "profile";
 
 
-
-    const review = document.createElement("div");
-    review.innerText = reviews;
-    review.className = "review";
+   // const review = document.createElement("div");
+   // review.innerText = reviews;
+   // review.className = "review";
      
     let mediaarr = [];
     if(selectmedia){
     const uploaddata = new FormData();
     uploaddata.append("media",selectmedia);
-
+   
+    try{
     const uploadres = await fetch("http://localhost:3290/upload",{
       method:"POST",
-      body:uploadres
+      body:uploaddata
     });
 
     const media = await uploadres.json();
     mediaarr.push(media);
+  } catch(error){
+    console.log("Unable to upload media check your network",error);
   }
-
+    } 
     const reviewData = {
       //ReviewProfileImage: ReviewProfileImage,
       ReviewerName: "Anonymous",
@@ -216,10 +359,10 @@
       ReviewMedia:mediaarr
     };
 
-    const img = document.createElement("img");
-    img.src = "http://localhost:3900/uploads/1.png";
-    img.alt = "profile";
-    img.className = "profile-img";
+   // const img = document.createElement("img");
+   // img.src = "http://localhost:3900/uploads/1.png";
+   // img.alt = "profile";
+   // img.className = "profile-img";
 
     try {
       send.disabled = true;
@@ -238,7 +381,10 @@
 
       const result = await sendmess.json();
       console.log('Review Uploaded successfully', sendmess);
+      
 
+      const newReview = createReviewElement(reviewData);
+      comments.prepend(newReview);
       // createreview(reviewData);
 
       text.value = "";
@@ -261,166 +407,166 @@
       send.innerHTML = '<i class="fa-solid fa-paper-plane fa-rotate-by" style="--fa-rotate-angle: 45deg;"></i>';
     }
 
-    let mediaElement = null;
-    if (selectmedia) {
-      const url = URL.createObjectURL(selectmedia);
-
-      if (selectmedia.type.startsWith("image")) {
-        mediaElement = document.createElement("img");
-        mediaElement.src = url;
-        mediaElement.style.maxWidth = "100%";
-        mediaElement.style.borderRadius = "6px";
-        mediaElement.style.marginTop = "5px";
-      }
-      else if (selectmedia.type.startsWith("video")) {
-        mediaElement = document.createElement("video");
-        mediaElement.src = url;
-        mediaElement.controls = true;
-        mediaElement.style.maxWidth = "100%";
-        mediaElement.style.marginTop = "5px";
-      }
-    }
+    //let mediaElement = null;
+    //if (selectmedia) {
+    //  const url = URL.createObjectURL(selectmedia);
+//
+    //  if (selectmedia.type.startsWith("image")) {
+    //    mediaElement = document.createElement("img");
+    //    mediaElement.src = url;
+    //    mediaElement.style.maxWidth = "100%";
+    //    mediaElement.style.borderRadius = "6px";
+    //    mediaElement.style.marginTop = "5px";
+    //  }
+    //  else if (selectmedia.type.startsWith("video")) {
+    //    mediaElement = document.createElement("video");
+    //    mediaElement.src = url;
+    //    mediaElement.controls = true;
+    //    mediaElement.style.maxWidth = "100%";
+    //    mediaElement.style.marginTop = "5px";
+    //  }
+    //}
 
     
-    if (review.ReviewMedia?.length) {
-  review.ReviewMedia.forEach(media => {
-    if (media.type === "image") {
-      const img = document.createElement("img");
-      img.src = media.url;
-      overalluser.appendChild(img);
-    } else {
-      const video = document.createElement("video");
-      video.src = media.url;
-      video.controls = true;
-      overalluser.appendChild(video);
-    }
-  });
-}
-
-    const time = document.createElement("div");
-    time.className = "time";
-    time.dataset.createdAt = new Date().toISOString();
-    time.innerText = "Just now";
-
-    //const timestamp = new Date();
-    updatestatus(time);
-
-    const totaltran = document.createElement("div");
-    totaltran.className = "totaltran";
-
-    const allbutton = document.createElement("span");
-    allbutton.id = "allbtn";
-
-    const translateBtn = document.createElement("button");
-    translateBtn.id = "translate";
-    translateBtn.innerHTML = '<i class="fa-solid fa-language"></i>';
-
-    const like = document.createElement("button");
-    like.id = "likebtn";
-    like.innerHTML = '<i class="fa-regular fa-thumbs-up"></i>';
-
-    const dislike = document.createElement("button");
-    dislike.id = "dislikebtn";
-    dislike.innerHTML = '<i class="fa-regular fa-thumbs-down"></i>';
-
-    const reply = document.createElement("button");
-    reply.id = "replybtn";
-    reply.innerHTML = '<i class="fa-solid fa-reply"></i>';
-
-    const lanstatus = document.createElement("p");
-    lanstatus.className = "lanstatus";
-    lanstatus.innerHTML = `<b>Available</b>`;
-
-    const uppersec = document.createElement("div");
-    uppersec.id = "uppersec";
-
-    const allrate = document.createElement("div");
-    allrate.className = "rating-display";
-
-    const secopt = document.createElement("div");
-    secopt.id = "secopt";
-    secopt.innerHTML = '<i class="fa-solid fa-ellipsis-vertical"></i>'
-
-
-
-
-    const extrabtn = document.createElement("div");
-    extrabtn.id = "extrabtn";
-    extrabtn.innerHTML = `
-        <button class="inextra"><i class="fa-regular fa-flag"></i><span>Mark</span></button>
-        <button class="inextra"><i class="fa-solid fa-address-book"></i><span>Reviewbook</span></button>
-        <button class="inextra"><i class="fa-solid fa-ban"></i><span>Report</span></button>
-        <button class="inextra"><i class="fa-solid fa-bookmark"></i><span>Save</span></button>
-        <button class="inextra"><i class="fa-solid fa-marker"></i><span>Feedback</span></button>
-        <button class="inextra"><i class="fa-solid fa-circle-info"></i><span>info</span></button>
-        `;
-
-    secopt.addEventListener("click", (e) => {
-      e.stopPropagation();
-      document.querySelectorAll("#extrabtn").forEach(sth => {
-        if (sth !== extrabtn)
-          sth.classList.remove("show");
-
-      });
-
-      extrabtn.classList.toggle("show");
-    })
-
-    document.addEventListener("click", () => {
-      document.querySelectorAll("#extrabtn").forEach(box => {
-        box.classList.remove("show");
-      });
-    });
-
-    for (let index = 0; index < 5; index++) {
-      //  const element = array[index];
-      const star = document.createElement("i");
-      star.className = "fa-solid fa-star";
-      // const sel = updatestart(rates);
-      star.style.color = index < countstar ? "gold" : "gray";
-      star.style.fontSize = "18px";
-      star.style.backgroundColor = "transparent";
-      //  star.style.display = "flex";
-      //  star.style.justifyContent = "center";
-      //  star.style.alignItems="center";
-      //  star.style.flexDirection="row";
-      allrate.appendChild(star);
-    }
-
-
-
-
-    profile.appendChild(img);
-   // overalluser.appendChild(profile);
-    overalluser.appendChild(uppersec);
-    overalluser.appendChild(review);
-    if (mediaElement) {
-      overalluser.appendChild(mediaElement);
-    }
-
-    overalluser.appendChild(time);
-    // overalluser.appendChild(like);
-    // overalluser.appendChild(dislike);
-    // overalluser.appendChild(reply);
-    overalluser.appendChild(allbutton);
-    uppersec.appendChild(profile);
-    uppersec.appendChild(allrate);
-    uppersec.appendChild(secopt);
-    uppersec.appendChild(extrabtn);
-
-    allbutton.appendChild(like);
-    allbutton.appendChild(dislike);
-
-    allbutton.appendChild(reply);
-    allbutton.appendChild(totaltran);
-    totaltran.appendChild(translateBtn);
-    totaltran.appendChild(lanstatus);
-    comments.prepend(overalluser);
-
-    text.value = "";
-    emptytext = false;
-  }
-
+//    if (review.ReviewMedia?.length) {
+//  review.ReviewMedia.forEach(media => {
+//    if (media.type === "image") {
+//      const img = document.createElement("img");
+//      img.src = media.url;
+//      overalluser.appendChild(img);
+//    } else {
+//      const video = document.createElement("video");
+//      video.src = media.url;
+//      video.controls = true;
+//      overalluser.appendChild(video);
+//    }
+//  });
+//}
+//
+//    const time = document.createElement("div");
+//    time.className = "time";
+//    time.dataset.createdAt = new Date().toISOString();
+//    time.innerText = "Just now";
+//
+//    //const timestamp = new Date();
+//    updatestatus(time);
+//
+//    const totaltran = document.createElement("div");
+//    totaltran.className = "totaltran";
+//
+//    const allbutton = document.createElement("span");
+//    allbutton.id = "allbtn";
+//
+//    const translateBtn = document.createElement("button");
+//    translateBtn.id = "translate";
+//    translateBtn.innerHTML = '<i class="fa-solid fa-language"></i>';
+//
+//    const like = document.createElement("button");
+//    like.id = "likebtn";
+//    like.innerHTML = '<i class="fa-regular fa-thumbs-up"></i>';
+//
+//    const dislike = document.createElement("button");
+//    dislike.id = "dislikebtn";
+//    dislike.innerHTML = '<i class="fa-regular fa-thumbs-down"></i>';
+//
+//    const reply = document.createElement("button");
+//    reply.id = "replybtn";
+//    reply.innerHTML = '<i class="fa-solid fa-reply"></i>';
+//
+//    const lanstatus = document.createElement("p");
+//    lanstatus.className = "lanstatus";
+//    lanstatus.innerHTML = `<b>Available</b>`;
+//
+//    const uppersec = document.createElement("div");
+//    uppersec.id = "uppersec";
+//
+//    const allrate = document.createElement("div");
+//    allrate.className = "rating-display";
+//
+//    const secopt = document.createElement("div");
+//    secopt.id = "secopt";
+//    secopt.innerHTML = '<i class="fa-solid fa-ellipsis-vertical"></i>'
+//
+//
+//
+//
+//    const extrabtn = document.createElement("div");
+//    extrabtn.id = "extrabtn";
+//    extrabtn.innerHTML = `
+//        <button class="inextra"><i class="fa-regular fa-flag"></i><span>Mark</span></button>
+//        <button class="inextra"><i class="fa-solid fa-address-book"></i><span>Reviewbook</span></button>
+//        <button class="inextra"><i class="fa-solid fa-ban"></i><span>Report</span></button>
+//        <button class="inextra"><i class="fa-solid fa-bookmark"></i><span>Save</span></button>
+//        <button class="inextra"><i class="fa-solid fa-marker"></i><span>Feedback</span></button>
+//        <button class="inextra"><i class="fa-solid fa-circle-info"></i><span>info</span></button>
+//        `;
+//
+//    secopt.addEventListener("click", (e) => {
+//      e.stopPropagation();
+//      document.querySelectorAll("#extrabtn").forEach(sth => {
+//        if (sth !== extrabtn)
+//          sth.classList.remove("show");
+//
+//      });
+//
+//      extrabtn.classList.toggle("show");
+//    })
+//
+//    document.addEventListener("click", () => {
+//      document.querySelectorAll("#extrabtn").forEach(box => {
+//        box.classList.remove("show");
+//      });
+//    });
+//
+//    for (let index = 0; index < 5; index++) {
+//      //  const element = array[index];
+//      const star = document.createElement("i");
+//      star.className = "fa-solid fa-star";
+//      // const sel = updatestart(rates);
+//      star.style.color = index < countstar ? "gold" : "gray";
+//      star.style.fontSize = "18px";
+//      star.style.backgroundColor = "transparent";
+//      //  star.style.display = "flex";
+//      //  star.style.justifyContent = "center";
+//      //  star.style.alignItems="center";
+//      //  star.style.flexDirection="row";
+//      allrate.appendChild(star);
+//    }
+//
+//
+//
+//
+//    profile.appendChild(img);
+//   // overalluser.appendChild(profile);
+//    overalluser.appendChild(uppersec);
+//    overalluser.appendChild(review);
+//    if (mediaElement) {
+//      overalluser.appendChild(mediaElement);
+//    }
+//
+//    overalluser.appendChild(time);
+//    // overalluser.appendChild(like);
+//    // overalluser.appendChild(dislike);
+//    // overalluser.appendChild(reply);
+//    overalluser.appendChild(allbutton);
+//    uppersec.appendChild(profile);
+//    uppersec.appendChild(allrate);
+//    uppersec.appendChild(secopt);
+//    uppersec.appendChild(extrabtn);
+//
+//    allbutton.appendChild(like);
+//    allbutton.appendChild(dislike);
+//
+//    allbutton.appendChild(reply);
+//    allbutton.appendChild(totaltran);
+//    totaltran.appendChild(translateBtn);
+//    totaltran.appendChild(lanstatus);
+//    comments.prepend(overalluser);
+//
+//    text.value = "";
+//    emptytext = false;
+ }
+//
 
   window.addEventListener("beforeunload", (e) => {
     if (!emptytext) return;
@@ -518,27 +664,45 @@
 
   async function loadExistingReviews() {
     try {
-      const response = await fetch(`${mainapi}/${FoodID}/reviews`);
-      if (!response.ok) throw new Error('Failed to load reviews');
+      let response ;
+      try {
+       response = await fetch(`${mainapi}/${FoodID}`);  // here i use to fetch previous review or replies and here i use getmanga endpoint
+       }
+       catch(error){
+        console.log("Fail to fetch review and replies");
+         response = await fetch(`${mainapi}/${FoodID}/reviews`);
+       }
+
+        if (!response.ok) throw new Error('Failed to load reviews');
 
       const snack = await response.json();
+      console.log(snack);
 
+       
 
+  
       if (snack.Reviewers_detail && snack.Reviewers_detail.length > 0) {
         snack.Reviewers_detail
           .filter(review => review.parentId === null) // Only top-level reviews
           .reverse()
           .forEach(review => {
-            createReviewElement({
-              ReviewerName: review.ReviewerName,
-              Rating: Number(review.Rating),
-              Review: review.Review,
-              Overallexperience: review.Overallexperience
-            });
+            const reviewcontainer = createReviewElement({
+              ReviewerName: review.ReviewerName || "Anonymous",
+              Rating: Number(review.Rating) || 0,
+              Review: review.Review || "",
+              Overallexperience: review.Overallexperience || "",
+              ReviewMedia: review.ReviewMedia || [],
+              ReviewProfileImage: review.ReviewProfileImage
+            },review._id, review.createdAt);
+            comments.appendChild(reviewcontainer);
           });
+      }
+      else {
+        console.error("No review && replies exist so empty here");
       }
     } catch (error) {
       console.error('Error loading reviews:', error);
+      showerr.textContent = "Failed to load existing reviews";
     }
   }
 
