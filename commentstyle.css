@@ -284,3 +284,10 @@
   object-fit: cover;
   margin-left: 5px;
 }
+
+.reply {
+  margin-left: 40px;
+  border-left: 2px solid #ddd;
+  padding-left: 12px;
+  margin-top: 8px;
+}

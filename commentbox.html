@@ -678,11 +678,21 @@
       const snack = await response.json();
       console.log(snack);
 
+      // here if parentid == null means only review not replies so we have to add it using For Each and spread operator
+      const group = {};
+      snack.Reviewers_detail.forEach(element => {
+        group[element._id] = {...element,replies:[]};
+      });
        
+      snack.Reviewers_detail.forEach(ki =>{
+         if(ki.parentId){
+          group[ki.parentId]?.replies.push(group[ki._id]);
+         }
+      }
+  );
 
-  
       if (snack.Reviewers_detail && snack.Reviewers_detail.length > 0) {
-        snack.Reviewers_detail
+        Object.values(group)
           .filter(review => review.parentId === null) // Only top-level reviews
           .reverse()
           .forEach(review => {
@@ -694,7 +704,26 @@
               ReviewMedia: review.ReviewMedia || [],
               ReviewProfileImage: review.ReviewProfileImage
             },review._id, review.createdAt);
-            comments.appendChild(reviewcontainer);
+
+
+              review.replies.forEach(reply => {
+      const replyfinite = createReviewElement(
+        {
+          ReviewerName: reply.ReviewerName || "Anonymous",
+          Rating: Number(reply.Rating) || 0,
+          Review: reply.Review || "",
+          Overallexperience: reply.Overallexperience || "",
+          ReviewMedia: reply.ReviewMedia || [],
+          ReviewProfileImage: reply.ReviewProfileImage
+        },
+        reply._id,
+        reply.createdAt
+      );
+
+      replyfinite.classList.add("reply");
+      reviewcontainer.appendChild(replyfinite);
+    });
+           comments.appendChild(reviewcontainer);
           });
       }
       else {
