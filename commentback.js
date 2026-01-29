@@ -19,7 +19,7 @@ const storeupload = multer.diskStorage({
     }
 });
 const uploads = multer({
-    storeupload,
+     storage : storeupload,
     limits : {
         fileSize: 150 * 1024 * 1024
     },
@@ -38,7 +38,7 @@ app.get("/",(req,res)=>{
 })
 app.post("/upload",uploads.single("media"),(req,res)=>{
    res.status(200).json({
-    url:``,
+    url:`http://localhost:3290/uploads/${req.file.filename}`,
     msg:"File uploaded Successfully"
 });
 })

@@ -289,5 +289,6 @@
   margin-left: 40px;
   border-left: 2px solid #ddd;
   padding-left: 12px;
-  margin-top: 8px;
+  margin-top: 8px; 
+  position: relative;
 }

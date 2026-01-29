@@ -232,26 +232,36 @@
     review.innerText = reviewData.Review;
     review.className = "review";
 
-    // Review media
-    if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
-      reviewData.ReviewMedia.forEach(media => {
-        if (media.type === "image") {
-          const img = document.createElement("img");
-          img.src = media.url;
-          img.style.maxWidth = "100%";
-          img.style.borderRadius = "6px";
-          img.style.marginTop = "5px";
-          overalluser.appendChild(img);
-        } else if (media.type === "video") {
-          const video = document.createElement("video");
-          video.src = media.url;
-          video.controls = true;
-          video.style.maxWidth = "100%";
-          video.style.marginTop = "5px";
-          overalluser.appendChild(video);
-        }
-      });
+    
+     overalluser.appendChild(uppersec);
+    overalluser.appendChild(review);
+
+    // review media adjuct css 
+    // Replace lines ~229-248 with:
+if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
+  reviewData.ReviewMedia.forEach(media => {
+    const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(media.url);
+    const isVideo = /\.(mp4|webm|ogg)$/i.test(media.url);
+    
+    if (isImage) {
+      const img = document.createElement("img");
+      img.src = media.url;
+      img.style.maxWidth = "100%";
+      img.style.borderRadius = "6px";
+      img.style.marginTop = "5px";
+      img.style.margin="auto";
+      img.style.backgroundColor="black"
+      overalluser.appendChild(img);
+    } else if (isVideo) {
+      const video = document.createElement("video");
+      video.src = media.url;
+      video.controls = true;
+      video.style.maxWidth = "100%";
+      video.style.marginTop = "5px";
+      overalluser.appendChild(video);
     }
+  });
+}
 
     //  Freeze Time i used initially Just now 
     const time = document.createElement("div");
@@ -294,8 +304,7 @@
     uppersec.appendChild(secopt);
     uppersec.appendChild(extrabtn);
 
-    overalluser.appendChild(uppersec);
-    overalluser.appendChild(review);
+   
     overalluser.appendChild(time);
     
     allbutton.appendChild(like);
@@ -359,10 +368,7 @@
       ReviewMedia:mediaarr
     };
 
-   // const img = document.createElement("img");
-   // img.src = "http://localhost:3900/uploads/1.png";
-   // img.alt = "profile";
-   // img.className = "profile-img";
+    
 
     try {
       send.disabled = true;
@@ -663,77 +669,51 @@
 
 
   async function loadExistingReviews() {
-    try {
-      let response ;
-      try {
-       response = await fetch(`${mainapi}/${FoodID}`);  // here i use to fetch previous review or replies and here i use getmanga endpoint
-       }
-       catch(error){
-        console.log("Fail to fetch review and replies");
-         response = await fetch(`${mainapi}/${FoodID}/reviews`);
-       }
+  try {
+    const response = await fetch(`${mainapi}/${FoodID}`);
+    if (!response.ok) throw new Error("Failed to load reviews");
 
-        if (!response.ok) throw new Error('Failed to load reviews');
+    const result = await response.json();
+    const snack = result.data || result;
 
-      const snack = await response.json();
-      console.log(snack);
-
-      // here if parentid == null means only review not replies so we have to add it using For Each and spread operator
-      const group = {};
-      snack.Reviewers_detail.forEach(element => {
-        group[element._id] = {...element,replies:[]};
-      });
-       
-      snack.Reviewers_detail.forEach(ki =>{
-         if(ki.parentId){
-          group[ki.parentId]?.replies.push(group[ki._id]);
-         }
-      }
-  );
-
-      if (snack.Reviewers_detail && snack.Reviewers_detail.length > 0) {
-        Object.values(group)
-          .filter(review => review.parentId === null) // Only top-level reviews
-          .reverse()
-          .forEach(review => {
-            const reviewcontainer = createReviewElement({
-              ReviewerName: review.ReviewerName || "Anonymous",
-              Rating: Number(review.Rating) || 0,
-              Review: review.Review || "",
-              Overallexperience: review.Overallexperience || "",
-              ReviewMedia: review.ReviewMedia || [],
-              ReviewProfileImage: review.ReviewProfileImage
-            },review._id, review.createdAt);
-
-
-              review.replies.forEach(reply => {
-      const replyfinite = createReviewElement(
-        {
-          ReviewerName: reply.ReviewerName || "Anonymous",
-          Rating: Number(reply.Rating) || 0,
-          Review: reply.Review || "",
-          Overallexperience: reply.Overallexperience || "",
-          ReviewMedia: reply.ReviewMedia || [],
-          ReviewProfileImage: reply.ReviewProfileImage
-        },
-        reply._id,
-        reply.createdAt
-      );
-
-      replyfinite.classList.add("reply");
-      reviewcontainer.appendChild(replyfinite);
-    });
-           comments.appendChild(reviewcontainer);
-          });
-      }
-      else {
-        console.error("No review && replies exist so empty here");
-      }
-    } catch (error) {
-      console.error('Error loading reviews:', error);
-      showerr.textContent = "Failed to load existing reviews";
+    if (!Array.isArray(snack.Reviewers_detail)) {
+      console.log("No reviews yet");
+      return;
     }
+
+    const group = {};
+
+    snack.Reviewers_detail.forEach(el => {
+      group[el._id] = { ...el, replies: [] };
+    });
+
+    snack.Reviewers_detail.forEach(el => {
+      if (el.parentId) {
+        group[el.parentId]?.replies.push(group[el._id]);
+      }
+    });
+
+    Object.values(group)
+      .filter(r => r.parentId === null)
+      .reverse()
+      .forEach(review => {
+        const reviewcontainer = createReviewElement(review, review._id, review.date);
+
+        review.replies.forEach(reply => {
+          const replyEl = createReviewElement(reply, reply._id, reply.date);
+          replyEl.classList.add("reply");
+          reviewcontainer.appendChild(replyEl);
+        });
+
+        comments.appendChild(reviewcontainer);
+      });
+
+  } catch (err) {
+    console.error("Error loading reviews:", err);
+    showerr.textContent = "Failed to load existing reviews";
   }
+}
+
 
 
   document.addEventListener('DOMContentLoaded', loadExistingReviews);
