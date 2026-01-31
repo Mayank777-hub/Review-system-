@@ -320,3 +320,13 @@
 html {
   scroll-behavior: smooth;
 }
+.rindi {
+   display:flex;
+   justify-content:"center";
+   align-items: center;
+   width: 36vw;
+   background: black;
+   border:1px solid white;
+   height: 4vh;;
+  }
+

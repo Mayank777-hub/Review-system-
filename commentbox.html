@@ -384,7 +384,7 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
       send.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
       let reviewData,currapi;
       if(replyexist){
-        currapi = `${mainapi}/${FoodID}/${parentId}/addreply`;
+        currapi = `${mainapi}/${FoodID}/review/${parentId}/reply`;//${mainapi}/${FoodID}/review/${parentId}/reply
         reviewData = {
            ReplyName: "Anonymous",
         Reply: reviews,
@@ -650,9 +650,9 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
    const indicator = document.createElement('div');
   indicator.className = 'rindi';
   indicator.style.cssText = `
-    background: black;
+    
    // border-left: 3px solid #2196F3;
-    padding: 8px 12px;
+    padding: 0px 12px;
     margin-bottom: 8px;
     border-radius: 4px;
     display: flex;
@@ -662,7 +662,7 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
   `;
   
   indicator.innerHTML = `
-    <span style="color: yellow; font-size: 14px;background-color:black">
+    <span style="color: yellow; font-size: 14px;background-color:black;font-size:18px";>
       <i class="fa-solid fa-reply"></i> Replying to <strong>${username}</strong>
     </span>
     <button id="cancel-reply" style="
@@ -672,24 +672,32 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
       cursor: pointer;
       font-size: 18px;
       padding: 0;
-      width: 24px;
+      width: 50px;
       height: 24px;
-    ">X</button>
+    "><i class="fa-solid fa-xmark" style="color: #FFD43B;"></i></button>
   `;  
 
-const commentbox = document.querySelector(".commentb");
-commentbox.insertBefore(indicator,text);
+  document.querySelectorAll(".rate").forEach(s=>{
+    s.style.display = 'none';
+  })
+//  const hidestar = document.querySelector(".rating");
+//  hidestar.appendChild(indicator);
+//const commentbox = document.querySelector(".commentb");
+//commentbox.insertBefore(indicator,text);
+
+
 
 const hideexp = document.querySelector('select'); 
 hideexp.style.display='none';
 
- const ratingDiv = document.querySelector('.rating'); ratingDiv.style.display = 'none'; 
+ const ratingDiv = document.querySelector('.rating');// ratingDiv.style.display = 'none'; 
+  ratingDiv.appendChild(indicator);
  document.getElementById('cancel-reply').addEventListener('click', cancelReply);
 
   }
 
   function cancelReply() {
-  const indicator = document.querySelector('.reply-indicator');
+  const indicator = document.querySelector('.rindi');
   if (indicator) indicator.remove();
   
   delete text.dataset.replyto;
@@ -698,8 +706,10 @@ hideexp.style.display='none';
   const experienceSelect = document.querySelector('select');
   experienceSelect.style.display = 'block';
   
-  const ratingDiv = document.querySelector('.rating');
-  ratingDiv.style.display = 'flex';
+  //const ratingDiv = document.querySelector('.rating');
+  //ratingDiv.style.display = 'flex';
+
+  document.querySelectorAll(".rate").forEach(a => a.style.display="flex");
   
   text.value = '';
   text.focus();
