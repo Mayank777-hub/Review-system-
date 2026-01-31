@@ -132,13 +132,13 @@
     text.value += event.detail.unicode;
   });
 
-  // Toggle emoji picker
+  // add emoji picker
   emojiBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     const isVisible = picker.style.display === 'block';
     picker.style.display = isVisible ? 'none' : 'block';
 
-    // Position near button
+    // pos near button
     const rect = emojiBtn.getBoundingClientRect();
     picker.style.left = rect.left + 'px';
     picker.style.top = (rect.bottom + 5) + 'px';
@@ -184,12 +184,15 @@
     profile.className = "profile";
 
     const img = document.createElement("img");
-    img.src = reviewData.ReviewProfileImage || "http://localhost:3900/uploads/1.png";
+    img.src = reviewData.ReviewProfileImage 
+  ? `http://localhost:3900/uploads/${reviewData.ReviewProfileImage}`
+  : "http://localhost:3900/uploads/1.png";
+  
     img.alt = "profile";
     img.className = "profile-img";
     profile.appendChild(img);
 
-    // Rating display gray if not selected 
+    
     const allrate = document.createElement("div");
     allrate.className = "rating-display";
     
@@ -226,8 +229,11 @@
       });
       extrabtn.classList.toggle("show");
     });
-
-    // Review text
+    
+    extrabtn.addEventListener("click", (e) => {
+  e.stopPropagation(); 
+});
+    
     const review = document.createElement("div");
     review.innerText = reviewData.Review;
     review.className = "review";
@@ -237,7 +243,7 @@
     overalluser.appendChild(review);
 
     // review media adjuct css 
-    // Replace lines ~229-248 with:
+   
 if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
   reviewData.ReviewMedia.forEach(media => {
     const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(media.url);
@@ -263,7 +269,7 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
   });
 }
 
-    //  Freeze Time i used initially Just now 
+    //  Freeze Time
     const time = document.createElement("div");
     time.className = "time";
     time.dataset.createdAt = createdAt ? new Date(createdAt).toISOString() : new Date().toISOString();
@@ -286,7 +292,18 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
     reply.id = "replybtn";
     reply.innerHTML = '<i class="fa-solid fa-reply"></i>';
 
-    // Translation lanstatus struct
+
+
+    reply.addEventListener("click",(e)=>{
+   e.stopPropagation();
+   text.scrollIntoView({behavior:'smooth',block:'center'});
+   text.focus();
+   const parentReviewId = reviewId || reviewData._id;
+   text.dataset.replyto = parentReviewId;    // 697651564a600513c25080c3
+    text.dataset.replyingToName = reviewData.ReviewerName;
+     showReplyanimation(reviewData.ReviewerName, parentReviewId);
+    })
+   
     const totaltran = document.createElement("div");
     totaltran.className = "totaltran";
 
@@ -298,7 +315,7 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
     lanstatus.className = "lanstatus";
     lanstatus.innerHTML = `<b>Available</b>`;
 
-    // Dom manipulative structure
+    
     uppersec.appendChild(profile);
     uppersec.appendChild(allrate);
     uppersec.appendChild(secopt);
@@ -320,13 +337,15 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
     return overalluser;
   }
   async function sendmessage() {
+    const parentId = text.dataset.replyto;
+    const replyexist = !!text.dataset.replyto;
     const reviews = text.value.trim();
     const selectexperience = document.querySelector('select').value;
     if (!reviews.trim()) {
       showerr.textContent="Review cannot be empty";
       return;
     }
-    if (!selectexperience) {
+    if (!replyexist && !selectexperience) {
       showerr.textContent = "Please share your experience";
       return;
     }
@@ -359,7 +378,22 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
     console.log("Unable to upload media check your network",error);
   }
     } 
-    const reviewData = {
+    
+    try {
+      send.disabled = true;
+      send.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+      let reviewData,currapi;
+      if(replyexist){
+        currapi = `${mainapi}/${FoodID}/${parentId}/addreply`;
+        reviewData = {
+           ReplyName: "Anonymous",
+        Reply: reviews,
+        ReviewMedia: mediaarr
+        };
+      }
+      else {
+        currapi = `${mainapi}/${FoodID}/review`;
+        reviewData = {
       //ReviewProfileImage: ReviewProfileImage,
       ReviewerName: "Anonymous",
       Rating: countstar,
@@ -367,13 +401,8 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
       Overallexperience: selectexperience,
       ReviewMedia:mediaarr
     };
-
-    
-
-    try {
-      send.disabled = true;
-      send.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-      const sendmess = await fetch(`${mainapi}/${FoodID}/review`, {
+      }
+      const sendmess = await fetch(currapi, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -386,11 +415,36 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
       }
 
       const result = await sendmess.json();
-      console.log('Review Uploaded successfully', sendmess);
+      console.log('Review  & replie Uploaded successfully', sendmess);
       
+       
+      if(replyexist){
+         const replyElement = createReviewElement(
+        result.reply,      
+        result.reply._id,  
+        result.reply.date  
+      );
+      replyElement.classList.add("reply");
 
-      const newReview = createReviewElement(reviewData);
+        const parentReview = document.querySelector(`[data-review-id="${parentId}"]`);
+      if (parentReview) {
+        parentReview.appendChild(replyElement);
+      }
+      
+      showSuccess("Reply posted successfully");
+      cancelReply();
+      }
+      else{
+         const newReview = createReviewElement(
+        result.review,      
+        result.review._id,  
+        result.review.date  
+      );
       comments.prepend(newReview);
+      showSuccess("Review submitted successfully");
+      }
+     // const newReview = createReviewElement(reviewData);
+      //comments.prepend(newReview);
       // createreview(reviewData);
 
       text.value = "";
@@ -402,7 +456,7 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
       emptytext = false;
       showerr.textContent = "";
 
-      showSuccess("Review submitted successfully");
+     // showSuccess("Review submitted successfully");
 
     } catch (error) {
       console.error("There is something wrong with Internet", error);
@@ -588,6 +642,69 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
       sendmessage();
     }
   })
+
+  function showReplyanimation(username,reviewId) {
+    const checkindicator = document.querySelector(".rindi");
+    if(checkindicator)checkindicator.remove();
+  
+   const indicator = document.createElement('div');
+  indicator.className = 'rindi';
+  indicator.style.cssText = `
+    background: black;
+   // border-left: 3px solid #2196F3;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: slideDown 0.2s ease-out;
+  `;
+  
+  indicator.innerHTML = `
+    <span style="color: yellow; font-size: 14px;background-color:black">
+      <i class="fa-solid fa-reply"></i> Replying to <strong>${username}</strong>
+    </span>
+    <button id="cancel-reply" style="
+      background: none;
+      border: none;
+      color: #666;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+    ">X</button>
+  `;  
+
+const commentbox = document.querySelector(".commentb");
+commentbox.insertBefore(indicator,text);
+
+const hideexp = document.querySelector('select'); 
+hideexp.style.display='none';
+
+ const ratingDiv = document.querySelector('.rating'); ratingDiv.style.display = 'none'; 
+ document.getElementById('cancel-reply').addEventListener('click', cancelReply);
+
+  }
+
+  function cancelReply() {
+  const indicator = document.querySelector('.reply-indicator');
+  if (indicator) indicator.remove();
+  
+  delete text.dataset.replyto;
+  delete text.dataset.replyingToName;
+  
+  const experienceSelect = document.querySelector('select');
+  experienceSelect.style.display = 'block';
+  
+  const ratingDiv = document.querySelector('.rating');
+  ratingDiv.style.display = 'flex';
+  
+  text.value = '';
+  text.focus();
+}
+
   function showSuccess(message) {
     const successpop = document.createElement("div");
     successpop.style.cssText = `
@@ -609,6 +726,14 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
     }, 3000);
 
   }
+
+  document.addEventListener("click",(e)=>{
+    if(!e.target.closest("#secopt") && (!e.target.closest("#extrabtn"))) {
+      document.querySelectorAll("#extrabtn").forEach(a => {
+         a.classList.remove("show");
+     })
+    }
+  })
   function updatestatus(time) {
     function update() {
       const createdAt = new Date(time.dataset.createdAt);
