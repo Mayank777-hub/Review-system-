@@ -40,3 +40,12 @@ Overallexperience
 "Outstanding"
 _id
 697651564a600513c25080c3
+.thread-container
+   *     |- .overalluser (depth 0)          <- parent review
+   *     |- .replycap                       <- holds depth-1 replies
+   *           |- .reply-wrapper
+   *                 |- .overalluser.reply (depth 1)
+   *                 |- .replycap           <- holds depth-2 replies
+   *                       |- .reply-wrapper
+   *                             |- .overalluser.reply (depth 2)
+   *                             |- .replycap ...

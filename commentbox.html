@@ -21,7 +21,7 @@
       <button class="rate four"><i class="fa-solid fa-star"></i></button>
       <button class="rate five"><i class="fa-solid fa-star"></i></button>
     </div>
-    <textarea name="text" class="text" placeholder="Share your reviews here..." aria-placeholder="vvhjgjhg"></textarea>
+    <textarea name="text" class="text" placeholder="Share your reviews here..."></textarea>
     <input type="file" name="media" id="fileallup" accept="image/*,video/*" hidden>
     <select name="" id="">
       <option value="" disabled selected hidden>OverallExperience</option>
@@ -42,7 +42,7 @@
       <button><i class="fa-regular fa-bookmark"></i></button>
       <button><i class="fa-solid fa-ban"></i></button>
       <button><i class="fa-solid fa-bookmark"></i></button>
-      <button><i class="fa-solid fa-star-half-stroke"></i></button>;
+      <button><i class="fa-solid fa-star-half-stroke"></i></button>
       <button><i class="fa-solid fa-address-book"></i></button>
       <button></button>
       <button><i class="fa-solid fa-thumbs-up"></i></button>
@@ -59,7 +59,7 @@
 </body>
 <script type="module">
   import { Picker } from 'https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js';
-  // const cors = require()
+
   const text = document.getElementsByClassName("text")[0];
   const send = document.getElementById("post");
   const comments = document.querySelector(".comments");
@@ -68,12 +68,7 @@
   const uploadallup = document.getElementById("fileallup");
   const showerr = document.getElementById("error");
   const mainapi = "http://localhost:3900/Fooditems";
-  const FoodID = '69412726afe89352da675468'; // doraemon Milk cookies
-
-  
-  //Picker.addEventListener("click", (e) => {
-//  //e.stopPropagation();
-//});
+  const FoodID = '69412726afe89352da675468';
 
   let selectmedia = null;
 
@@ -104,41 +99,25 @@
     showerr.textContent = "";
     selectmedia = file;
   })
-  //const emojiPicker = new EmojiButton({
-  //  position: 'top-start'
-  //});
-  //
-  //const emojiBtn = document.getElementById("emoji-btn");
-  ////const textarea = document.querySelector(".text");
-  //
-  //emojiBtn.addEventListener("click", () => {
-  //  emojiPicker.togglePicker(emojiBtn);
-  //});
-  //
-  //emojiPicker.on("emoji", emoji => {
-  //  text.value += emoji;
-  //});
+
   const picker = new Picker();
   picker.style.position = 'absolute';
   picker.style.display = 'none';
   document.body.appendChild(picker);
 
   picker.addEventListener("click", (e) => {
-  e.stopPropagation();
-});
-
+    e.stopPropagation();
+  });
 
   picker.addEventListener('emoji-click', (event) => {
     text.value += event.detail.unicode;
   });
 
-  // add emoji picker
   emojiBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     const isVisible = picker.style.display === 'block';
     picker.style.display = isVisible ? 'none' : 'block';
 
-    // pos near button
     const rect = emojiBtn.getBoundingClientRect();
     picker.style.left = rect.left + 'px';
     picker.style.top = (rect.bottom + 5) + 'px';
@@ -147,7 +126,6 @@
   document.addEventListener("click", () => {
     picker.style.display = "none";
   });
-
 
   let countstar = 0;
   document.querySelectorAll(".rate").forEach((btn, index) => {
@@ -160,7 +138,6 @@
   function updatestart(rates) {
     document.querySelectorAll(".rate i").forEach((star, i) => {
       star.style.color = i < rates ? "gold" : "green";
-      //  star.style.backgroundColor = "none"
     });
   }
 
@@ -169,14 +146,16 @@
   text.addEventListener("input", () => {
     emptytext = text.value.trim().length > 0;
   })
-   
-  function createReviewElement(reviewData, reviewId = null, createdAt = null) {
+
+  function createReviewElement(reviewData, reviewId = null, createdAt = null, depth = 0) {
+    const isReply = depth > 0;
+
     const overalluser = document.createElement("div");
-    overalluser.className = "overalluser";
+    overalluser.className = isReply ? "overalluser reply" : "overalluser";
     if (reviewId) {
       overalluser.dataset.reviewId = reviewId;
     }
-
+    overalluser.dataset.depth = depth;
     const uppersec = document.createElement("div");
     uppersec.id = "uppersec";
 
@@ -184,29 +163,30 @@
     profile.className = "profile";
 
     const img = document.createElement("img");
-    img.src = reviewData.ReviewProfileImage 
-  ? `http://localhost:3900/uploads/${reviewData.ReviewProfileImage}`
-  : "http://localhost:3900/uploads/1.png";
-  
+    img.src = reviewData.ReviewProfileImage
+      ? `http://localhost:3900/uploads/${reviewData.ReviewProfileImage}`
+      : "http://localhost:3900/uploads/1.png";
+
     img.alt = "profile";
     img.className = "profile-img";
     profile.appendChild(img);
 
-    
     const allrate = document.createElement("div");
     allrate.className = "rating-display";
-    
-    const rating = Number(reviewData.Rating) || 0;
-    for (let index = 0; index < 5; index++) {
-      const star = document.createElement("i");
-      star.className = "fa-solid fa-star";
-      star.style.color = index < rating ? "gold" : "gray";
-      star.style.fontSize = "18px";
-      star.style.backgroundColor = "transparent";
-      allrate.appendChild(star);
+
+    // Only add stars for parent reviews, not replies
+    if (!isReply) {
+      const rating = Number(reviewData.Rating) || 0;
+      for (let index = 0; index < 5; index++) {
+        const star = document.createElement("i");
+        star.className = "fa-solid fa-star";
+        star.style.color = index < rating ? "gold" : "gray";
+        star.style.fontSize = "18px";
+        star.style.backgroundColor = "transparent";
+        allrate.appendChild(star);
+      }
     }
 
-    // it provide hidden options like check info about user or mulple user.
     const secopt = document.createElement("div");
     secopt.id = "secopt";
     secopt.innerHTML = '<i class="fa-solid fa-ellipsis-vertical"></i>';
@@ -229,54 +209,59 @@
       });
       extrabtn.classList.toggle("show");
     });
-    
+
     extrabtn.addEventListener("click", (e) => {
-  e.stopPropagation(); 
-});
-    
+      e.stopPropagation();
+    });
+
     const review = document.createElement("div");
-    review.innerText = reviewData.Review;
+    review.className = "review";
+review.innerText = reviewData.Review || "";
+
     review.className = "review";
 
-    
-     overalluser.appendChild(uppersec);
+    //const replycap = document.createElement("div");
+    //replycap.className = 'replycap';
+
+    overalluser.appendChild(uppersec);
     overalluser.appendChild(review);
 
-    // review media adjuct css 
-   
-if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
-  reviewData.ReviewMedia.forEach(media => {
-    const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(media.url);
-    const isVideo = /\.(mp4|webm|ogg)$/i.test(media.url);
-    
-    if (isImage) {
-      const img = document.createElement("img");
-      img.src = media.url;
-      img.style.maxWidth = "100%";
-      img.style.borderRadius = "6px";
-      img.style.marginTop = "5px";
-      img.style.margin="auto";
-      img.style.backgroundColor="black"
-      overalluser.appendChild(img);
-    } else if (isVideo) {
-      const video = document.createElement("video");
-      video.src = media.url;
-      video.controls = true;
-      video.style.maxWidth = "100%";
-      video.style.marginTop = "5px";
-      overalluser.appendChild(video);
-    }
-  });
-}
+    // Only add replycap to parent reviews
+    //if (!isReply) {
+    //  overalluser.appendChild(replycap);
+    //}
 
-    //  Freeze Time
+    if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
+      reviewData.ReviewMedia.forEach(media => {
+        const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(media.url);
+        const isVideo = /\.(mp4|webm|ogg)$/i.test(media.url);
+
+        if (isImage) {
+          const img = document.createElement("img");
+          img.src = media.url;
+          img.style.maxWidth = "100%";
+          img.style.borderRadius = "6px";
+          img.style.marginTop = "5px";
+          img.style.margin = "auto";
+          img.style.backgroundColor = "black"
+          overalluser.appendChild(img);
+        } else if (isVideo) {
+          const video = document.createElement("video");
+          video.src = media.url;
+          video.controls = true;
+          video.style.maxWidth = "100%";
+          video.style.marginTop = "5px";
+          overalluser.appendChild(video);
+        }
+      });
+    }
+
     const time = document.createElement("div");
     time.className = "time";
     time.dataset.createdAt = createdAt ? new Date(createdAt).toISOString() : new Date().toISOString();
     time.innerText = "Just now";
     updatestatus(time);
 
-    // Buttons colections 
     const allbutton = document.createElement("span");
     allbutton.id = "allbtn";
 
@@ -292,18 +277,24 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
     reply.id = "replybtn";
     reply.innerHTML = '<i class="fa-solid fa-reply"></i>';
 
+    reply.addEventListener("click", (e) => {
+      e.stopPropagation();
+      text.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      text.focus();
+      const parentReviewId = reviewId || reviewData._id;
+      text.dataset.replyto = parentReviewId;
+      text.dataset.replydepth = overalluser.dataset.depth;
+      text.dataset.replyingToName = reviewData.ReviewerName || reviewData.ReplyName;
+      const username =
+  reviewData.ReviewerName ||
+  reviewData.ReplyName ||
+  reviewData.userName ||
+  "Anonymous";
 
-
-    reply.addEventListener("click",(e)=>{
-   e.stopPropagation();
-   text.scrollIntoView({behavior:'smooth',block:'center'});
-   text.focus();
-   const parentReviewId = reviewId || reviewData._id;
-   text.dataset.replyto = parentReviewId;    // 697651564a600513c25080c3
-    text.dataset.replyingToName = reviewData.ReviewerName;
-     showReplyanimation(reviewData.ReviewerName, parentReviewId);
+showReplyanimation(username, parentReviewId);
+    //  showReplyanimation(reviewData.ReviewerName || reviewData.ReplyName, parentReviewId);
     })
-   
+
     const totaltran = document.createElement("div");
     totaltran.className = "totaltran";
 
@@ -315,93 +306,99 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
     lanstatus.className = "lanstatus";
     lanstatus.innerHTML = `<b>Available</b>`;
 
-    
     uppersec.appendChild(profile);
-    uppersec.appendChild(allrate);
+    if (!isReply) {
+      uppersec.appendChild(allrate);
+    }
     uppersec.appendChild(secopt);
     uppersec.appendChild(extrabtn);
 
-   
     overalluser.appendChild(time);
-    
+
     allbutton.appendChild(like);
     allbutton.appendChild(dislike);
     allbutton.appendChild(reply);
     allbutton.appendChild(totaltran);
-    
+
     totaltran.appendChild(translateBtn);
     totaltran.appendChild(lanstatus);
-    
+
     overalluser.appendChild(allbutton);
 
     return overalluser;
   }
+
+
+  function wrapcomment(review) {
+    const wrap = document.createElement("div");
+    wrap.className = "wrap";
+    wrap.style.overflow = "visible";
+
+    const cap = document.createElement("div");
+    cap.className = "cap";
+
+    wrap.appendChild(review);
+    wrap.appendChild(cap);
+    return wrap;
+  }
   async function sendmessage() {
+    const cap = document.createElement("div");
+    cap.className = "cap";
     const parentId = text.dataset.replyto;
     const replyexist = !!text.dataset.replyto;
     const reviews = text.value.trim();
     const selectexperience = document.querySelector('select').value;
+
     if (!reviews.trim()) {
-      showerr.textContent="Review cannot be empty";
+      showerr.textContent = "Review cannot be empty";
       return;
     }
     if (!replyexist && !selectexperience) {
       showerr.textContent = "Please share your experience";
       return;
     }
-    //const overalluser = document.createElement("div");
-    //overalluser.className = "overalluser";
-//
-    //const profile = document.createElement("span");
-    //profile.className = "profile";
 
-
-
-   // const review = document.createElement("div");
-   // review.innerText = reviews;
-   // review.className = "review";
-     
     let mediaarr = [];
-    if(selectmedia){
-    const uploaddata = new FormData();
-    uploaddata.append("media",selectmedia);
-   
-    try{
-    const uploadres = await fetch("http://localhost:3290/upload",{
-      method:"POST",
-      body:uploaddata
-    });
+    if (selectmedia) {
+      const uploaddata = new FormData();
+      uploaddata.append("media", selectmedia);
 
-    const media = await uploadres.json();
-    mediaarr.push(media);
-  } catch(error){
-    console.log("Unable to upload media check your network",error);
-  }
-    } 
-    
+      try {
+        const uploadres = await fetch("http://localhost:3290/upload", {
+          method: "POST",
+          body: uploaddata
+        });
+
+        const media = await uploadres.json();
+        mediaarr.push(media);
+      } catch (error) {
+        console.log("Unable to upload media check your network", error);
+      }
+    }
+
     try {
       send.disabled = true;
       send.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-      let reviewData,currapi;
-      if(replyexist){
-        currapi = `${mainapi}/${FoodID}/review/${parentId}/reply`;//${mainapi}/${FoodID}/review/${parentId}/reply
+      let reviewData, currapi;
+
+      if (replyexist) {
+        currapi = `${mainapi}/${FoodID}/review/${parentId}/reply`;
         reviewData = {
-           ReplyName: "Anonymous",
-        Reply: reviews,
-        ReviewMedia: mediaarr
+          ReplyName: "Anonymous",
+          Reply: reviews,
+          ReviewMedia: mediaarr
         };
-      }
-      else {
+      } else {
         currapi = `${mainapi}/${FoodID}/review`;
         reviewData = {
-      //ReviewProfileImage: ReviewProfileImage,
-      ReviewerName: "Anonymous",
-      Rating: countstar,
-      Review: reviews,
-      Overallexperience: selectexperience,
-      ReviewMedia:mediaarr
-    };
+          ReviewerName: "Anonymous",
+          Rating: countstar,
+          Review: reviews,
+          Overallexperience: selectexperience,
+          ReviewMedia: mediaarr
+        };
       }
+
       const sendmess = await fetch(currapi, {
         method: 'POST',
         headers: {
@@ -415,37 +412,47 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
       }
 
       const result = await sendmess.json();
-      console.log('Review  & replie Uploaded successfully', sendmess);
-      
-       
-      if(replyexist){
-         const replyElement = createReviewElement(
-        result.reply,      
-        result.reply._id,  
-        result.reply.date  
-      );
-      replyElement.classList.add("reply");
+      console.log('Review & replie Uploaded successfully', sendmess);
+
+      if (replyexist) {
+        const parent = parseInt(text.dataset.replydepth) || 0;
+        const newd = parent + 1;
+        const replyElement = createReviewElement(
+          result.reply,
+          result.reply._id,
+          result.reply.date,
+          newd
+        );
+
+        const wrap = wrapcomment(replyElement);
 
         const parentReview = document.querySelector(`[data-review-id="${parentId}"]`);
-      if (parentReview) {
-        parentReview.appendChild(replyElement);
+        if (parentReview) {
+          const contans = parentReview.parentElement;
+          const repliesBox = contans.querySelector(":scope > .cap");
+          if (repliesBox) {
+            repliesBox.appendChild(wrap);
+          }
+        }
+
+        showSuccess("Reply posted successfully");
+        cancelReply();
+      } else {
+        const newReview = createReviewElement(
+          result.review,
+          result.review._id,
+          result.review.date,
+          0
+        );
+        const thread = document.createElement("div");
+        thread.className = "thread-container";
+        thread.style.overflow = "visible";
+        thread.appendChild(newReview);
+        thread.appendChild(cap);
+        comments.prepend(thread);
+
+        showSuccess("Review submitted successfully");
       }
-      
-      showSuccess("Reply posted successfully");
-      cancelReply();
-      }
-      else{
-         const newReview = createReviewElement(
-        result.review,      
-        result.review._id,  
-        result.review.date  
-      );
-      comments.prepend(newReview);
-      showSuccess("Review submitted successfully");
-      }
-     // const newReview = createReviewElement(reviewData);
-      //comments.prepend(newReview);
-      // createreview(reviewData);
 
       text.value = "";
       document.querySelector('select').selectedIndex = 0;
@@ -456,181 +463,17 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
       emptytext = false;
       showerr.textContent = "";
 
-     // showSuccess("Review submitted successfully");
-
     } catch (error) {
       console.error("There is something wrong with Internet", error);
       showerr.textContent = "Server slow try again later."
-    }
-    finally {
+    } finally {
       send.disabled = false;
       send.innerHTML = '<i class="fa-solid fa-paper-plane fa-rotate-by" style="--fa-rotate-angle: 45deg;"></i>';
     }
-
-    //let mediaElement = null;
-    //if (selectmedia) {
-    //  const url = URL.createObjectURL(selectmedia);
-//
-    //  if (selectmedia.type.startsWith("image")) {
-    //    mediaElement = document.createElement("img");
-    //    mediaElement.src = url;
-    //    mediaElement.style.maxWidth = "100%";
-    //    mediaElement.style.borderRadius = "6px";
-    //    mediaElement.style.marginTop = "5px";
-    //  }
-    //  else if (selectmedia.type.startsWith("video")) {
-    //    mediaElement = document.createElement("video");
-    //    mediaElement.src = url;
-    //    mediaElement.controls = true;
-    //    mediaElement.style.maxWidth = "100%";
-    //    mediaElement.style.marginTop = "5px";
-    //  }
-    //}
-
-    
-//    if (review.ReviewMedia?.length) {
-//  review.ReviewMedia.forEach(media => {
-//    if (media.type === "image") {
-//      const img = document.createElement("img");
-//      img.src = media.url;
-//      overalluser.appendChild(img);
-//    } else {
-//      const video = document.createElement("video");
-//      video.src = media.url;
-//      video.controls = true;
-//      overalluser.appendChild(video);
-//    }
-//  });
-//}
-//
-//    const time = document.createElement("div");
-//    time.className = "time";
-//    time.dataset.createdAt = new Date().toISOString();
-//    time.innerText = "Just now";
-//
-//    //const timestamp = new Date();
-//    updatestatus(time);
-//
-//    const totaltran = document.createElement("div");
-//    totaltran.className = "totaltran";
-//
-//    const allbutton = document.createElement("span");
-//    allbutton.id = "allbtn";
-//
-//    const translateBtn = document.createElement("button");
-//    translateBtn.id = "translate";
-//    translateBtn.innerHTML = '<i class="fa-solid fa-language"></i>';
-//
-//    const like = document.createElement("button");
-//    like.id = "likebtn";
-//    like.innerHTML = '<i class="fa-regular fa-thumbs-up"></i>';
-//
-//    const dislike = document.createElement("button");
-//    dislike.id = "dislikebtn";
-//    dislike.innerHTML = '<i class="fa-regular fa-thumbs-down"></i>';
-//
-//    const reply = document.createElement("button");
-//    reply.id = "replybtn";
-//    reply.innerHTML = '<i class="fa-solid fa-reply"></i>';
-//
-//    const lanstatus = document.createElement("p");
-//    lanstatus.className = "lanstatus";
-//    lanstatus.innerHTML = `<b>Available</b>`;
-//
-//    const uppersec = document.createElement("div");
-//    uppersec.id = "uppersec";
-//
-//    const allrate = document.createElement("div");
-//    allrate.className = "rating-display";
-//
-//    const secopt = document.createElement("div");
-//    secopt.id = "secopt";
-//    secopt.innerHTML = '<i class="fa-solid fa-ellipsis-vertical"></i>'
-//
-//
-//
-//
-//    const extrabtn = document.createElement("div");
-//    extrabtn.id = "extrabtn";
-//    extrabtn.innerHTML = `
-//        <button class="inextra"><i class="fa-regular fa-flag"></i><span>Mark</span></button>
-//        <button class="inextra"><i class="fa-solid fa-address-book"></i><span>Reviewbook</span></button>
-//        <button class="inextra"><i class="fa-solid fa-ban"></i><span>Report</span></button>
-//        <button class="inextra"><i class="fa-solid fa-bookmark"></i><span>Save</span></button>
-//        <button class="inextra"><i class="fa-solid fa-marker"></i><span>Feedback</span></button>
-//        <button class="inextra"><i class="fa-solid fa-circle-info"></i><span>info</span></button>
-//        `;
-//
-//    secopt.addEventListener("click", (e) => {
-//      e.stopPropagation();
-//      document.querySelectorAll("#extrabtn").forEach(sth => {
-//        if (sth !== extrabtn)
-//          sth.classList.remove("show");
-//
-//      });
-//
-//      extrabtn.classList.toggle("show");
-//    })
-//
-//    document.addEventListener("click", () => {
-//      document.querySelectorAll("#extrabtn").forEach(box => {
-//        box.classList.remove("show");
-//      });
-//    });
-//
-//    for (let index = 0; index < 5; index++) {
-//      //  const element = array[index];
-//      const star = document.createElement("i");
-//      star.className = "fa-solid fa-star";
-//      // const sel = updatestart(rates);
-//      star.style.color = index < countstar ? "gold" : "gray";
-//      star.style.fontSize = "18px";
-//      star.style.backgroundColor = "transparent";
-//      //  star.style.display = "flex";
-//      //  star.style.justifyContent = "center";
-//      //  star.style.alignItems="center";
-//      //  star.style.flexDirection="row";
-//      allrate.appendChild(star);
-//    }
-//
-//
-//
-//
-//    profile.appendChild(img);
-//   // overalluser.appendChild(profile);
-//    overalluser.appendChild(uppersec);
-//    overalluser.appendChild(review);
-//    if (mediaElement) {
-//      overalluser.appendChild(mediaElement);
-//    }
-//
-//    overalluser.appendChild(time);
-//    // overalluser.appendChild(like);
-//    // overalluser.appendChild(dislike);
-//    // overalluser.appendChild(reply);
-//    overalluser.appendChild(allbutton);
-//    uppersec.appendChild(profile);
-//    uppersec.appendChild(allrate);
-//    uppersec.appendChild(secopt);
-//    uppersec.appendChild(extrabtn);
-//
-//    allbutton.appendChild(like);
-//    allbutton.appendChild(dislike);
-//
-//    allbutton.appendChild(reply);
-//    allbutton.appendChild(totaltran);
-//    totaltran.appendChild(translateBtn);
-//    totaltran.appendChild(lanstatus);
-//    comments.prepend(overalluser);
-//
-//    text.value = "";
-//    emptytext = false;
- }
-//
+  }
 
   window.addEventListener("beforeunload", (e) => {
     if (!emptytext) return;
-
     e.preventDefault();
     e.returnValue = "";
   });
@@ -643,107 +486,96 @@ if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
     }
   })
 
-  function showReplyanimation(username,reviewId) {
+  function showReplyanimation(username, reviewId) {
     const checkindicator = document.querySelector(".rindi");
-    if(checkindicator)checkindicator.remove();
-  
-   const indicator = document.createElement('div');
-  indicator.className = 'rindi';
-  indicator.style.cssText = `
-    
-   // border-left: 3px solid #2196F3;
-    padding: 0px 12px;
-    margin-bottom: 8px;
-    border-radius: 4px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    animation: slideDown 0.2s ease-out;
-  `;
-  
-  indicator.innerHTML = `
-    <span style="color: yellow; font-size: 14px;background-color:black;font-size:18px";>
-      <i class="fa-solid fa-reply"></i> Replying to <strong>${username}</strong>
-    </span>
-    <button id="cancel-reply" style="
-      background: none;
-      border: none;
-      color: #666;
-      cursor: pointer;
-      font-size: 18px;
-      padding: 0;
-      width: 50px;
-      height: 24px;
-    "><i class="fa-solid fa-xmark" style="color: #FFD43B;"></i></button>
-  `;  
+    if (checkindicator) checkindicator.remove();
 
-  document.querySelectorAll(".rate").forEach(s=>{
-    s.style.display = 'none';
-  })
-//  const hidestar = document.querySelector(".rating");
-//  hidestar.appendChild(indicator);
-//const commentbox = document.querySelector(".commentb");
-//commentbox.insertBefore(indicator,text);
+    const indicator = document.createElement('div');
+    indicator.className = 'rindi';
+    indicator.style.cssText = `
+      padding: 0px 12px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: slideDown 0.2s ease-out;
+    `;
 
+    indicator.innerHTML = `
+      <span style="color: yellow; font-size: 14px;background-color:black;font-size:18px";>
+        <i class="fa-solid fa-reply"></i> Replying to <strong>${username}</strong>
+      </span>
+      <button id="cancel-reply" style="
+        background: none;
+        border: none;
+        color: #666;
+        cursor: pointer;
+        font-size: 18px;
+        padding: 0;
+        width: 50px;
+        height: 24px;
+      "><i class="fa-solid fa-xmark" style="color: #FFD43B;"></i></button>
+    `;
 
+    document.querySelectorAll(".rate").forEach(s => {
+      s.style.display = 'none';
+    })
 
-const hideexp = document.querySelector('select'); 
-hideexp.style.display='none';
+    const hideexp = document.querySelector('select');
+    hideexp.style.display = 'none';
 
- const ratingDiv = document.querySelector('.rating');// ratingDiv.style.display = 'none'; 
-  ratingDiv.appendChild(indicator);
- document.getElementById('cancel-reply').addEventListener('click', cancelReply);
-
+    const ratingDiv = document.querySelector('.rating');
+    ratingDiv.appendChild(indicator);
+    document.getElementById('cancel-reply').addEventListener('click', cancelReply);
   }
 
   function cancelReply() {
-  const indicator = document.querySelector('.rindi');
-  if (indicator) indicator.remove();
-  
-  delete text.dataset.replyto;
-  delete text.dataset.replyingToName;
-  
-  const experienceSelect = document.querySelector('select');
-  experienceSelect.style.display = 'block';
-  
-  //const ratingDiv = document.querySelector('.rating');
-  //ratingDiv.style.display = 'flex';
+    const indicator = document.querySelector('.rindi');
+    if (indicator) indicator.remove();
 
-  document.querySelectorAll(".rate").forEach(a => a.style.display="flex");
-  
-  text.value = '';
-  text.focus();
-}
+    delete text.dataset.replyto;
+    delete text.dataset.replydepth;
+    delete text.dataset.replyingToName;
+
+    const experienceSelect = document.querySelector('select');
+    experienceSelect.style.display = 'block';
+
+    document.querySelectorAll(".rate").forEach(a => a.style.display = "flex");
+
+    text.value = '';
+    text.focus();
+  }
 
   function showSuccess(message) {
     const successpop = document.createElement("div");
     successpop.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #4CAF50;
-    color: white;
-    padding: 15px 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    z-index: 1000;
-  `;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #4CAF50;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      z-index: 1000;
+    `;
     successpop.textContent = message;
     document.body.appendChild(successpop);
 
     setTimeout(() => {
       successpop.remove();
     }, 3000);
-
   }
 
-  document.addEventListener("click",(e)=>{
-    if(!e.target.closest("#secopt") && (!e.target.closest("#extrabtn"))) {
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#secopt") && (!e.target.closest("#extrabtn"))) {
       document.querySelectorAll("#extrabtn").forEach(a => {
-         a.classList.remove("show");
-     })
+        a.classList.remove("show");
+      })
     }
   })
+
   function updatestatus(time) {
     function update() {
       const createdAt = new Date(time.dataset.createdAt);
@@ -751,38 +583,28 @@ hideexp.style.display='none';
       const calct = Math.floor((curr - createdAt) / 1000);
 
       if (calct < 5) {
-        ;
         time.innerText = "Just Now";
-      }
-      else if (calct < 60) {
+      } else if (calct < 60) {
         time.innerText = `${calct} sec`;
-      }
-      else if (calct < 3600) {
+      } else if (calct < 3600) {
         time.innerText = `${Math.floor(calct / 60)} min`;
-      }
-      else if (calct < 86400) {
+      } else if (calct < 86400) {
         time.innerText = `${Math.floor(calct / 3600)} hour`;
-      }
-      else if (calct < 86400 * 2) {
+      } else if (calct < 86400 * 2) {
         time.innerText = 'Yesterday';
-      }
-      else if (calct < 604800) {
-        time.innerText = `${Math.floor(calct / 86400)} days`; //2592000 : 30 days, YEAR: 31536000
-      }
-      else if (calct < 2592000) {
+      } else if (calct < 604800) {
+        time.innerText = `${Math.floor(calct / 86400)} days`;
+      } else if (calct < 2592000) {
         time.innerText = `${Math.floor(calct / 86400)} week`;
-      }
-      else if (calct < 31536000) {
+      } else if (calct < 31536000) {
         time.innerText = `${Math.floor(calct / 2592000)} month`;
-      }
-      else {
+      } else {
         time.innerText = `${Math.floor(calct / 31536000)} years`;
       }
     }
     update();
     setInterval(update, 1000);
   }
-
 
   async function translateall(text) {
     try {
@@ -792,8 +614,6 @@ hideexp.style.display='none';
 
       if (!res.ok) throw new Error('Translation failed');
       const data = await res.json();
-
-      // Extract the translated text from the response
       const translatedText = data[0].map(item => item[0]).join('');
       return translatedText;
     } catch (error) {
@@ -802,97 +622,122 @@ hideexp.style.display='none';
     }
   }
 
-
   async function loadExistingReviews() {
-  try {
-    const response = await fetch(`${mainapi}/${FoodID}`);
-    if (!response.ok) throw new Error("Failed to load reviews");
+    try {
+      const response = await fetch(`${mainapi}/${FoodID}`);
+      if (!response.ok) throw new Error("Failed to load reviews");
 
-    const result = await response.json();
-    const snack = result.data || result;
+      const result = await response.json();
+      const snack = result.data || result;
 
-    if (!Array.isArray(snack.Reviewers_detail)) {
-      console.log("No reviews yet");
-      return;
-    }
-
-    const group = {};
-
-    snack.Reviewers_detail.forEach(el => {
-      group[el._id] = { ...el, replies: [] };
-    });
-
-    snack.Reviewers_detail.forEach(el => {
-      if (el.parentId) {
-        group[el.parentId]?.replies.push(group[el._id]);
+      if (!Array.isArray(snack.Reviewers_detail)) {
+        console.log("No reviews yet");
+        return;
       }
-    });
 
-    Object.values(group)
-      .filter(r => r.parentId === null)
-      .reverse()
-      .forEach(review => {
-        const reviewcontainer = createReviewElement(review, review._id, review.date);
+      const group = {};  // groupby -Id
 
-        review.replies.forEach(reply => {
-          const replyEl = createReviewElement(reply, reply._id, reply.date);
-          replyEl.classList.add("reply");
-          reviewcontainer.appendChild(replyEl);
-        });
-
-        comments.appendChild(reviewcontainer);
+      snack.Reviewers_detail.forEach(el => {
+        group[el._id] = { ...el, replies: [] };
       });
 
-  } catch (err) {
-    console.error("Error loading reviews:", err);
-    showerr.textContent = "Failed to load existing reviews";
+      const root = [];
+      snack.Reviewers_detail.forEach(el => {
+        if (el.parentId && group[el.parentId]) {
+          group[el.parentId].replies.push(group[el._id]);
+        }
+        else if (!el.parentId) {
+          root.push(group[el._id]);
+        }
+      });
+
+
+      function renderthreads(reviewData, depth, contans) {
+        const allreview = createReviewElement(
+          reviewData,
+          reviewData._id,
+          reviewData.date,
+          depth
+        );
+
+        if (depth === 0) {
+          contans.appendChild(allreview);
+
+          const cap = document.createElement("div");
+          cap.className = "cap";
+          contans.appendChild(cap);
+
+          (reviewData.replies || []).forEach(child => {
+            renderthreads(child, depth + 1, cap);
+          });
+        } else {
+          const wrap = wrapcomment(allreview);
+          contans.appendChild(wrap);
+
+          const cap = wrap.querySelector(".cap");
+
+          (reviewData.replies || []).forEach(child => {
+            renderthreads(child, depth + 1, cap);
+          });
+        }
+      }
+
+      Object.values(group)
+        .filter(r => r.parentId === null)
+        .reverse()
+        .forEach(review => {
+          const thread = document.createElement("div");
+          thread.className = "thread-container";
+          thread.style.overflow = "visible";
+
+          renderthreads(review, 0, thread);
+          comments.appendChild(thread);
+        });
+
+    } catch (err) {
+      console.error("Error loading reviews:", err);
+      showerr.textContent = "Failed to load existing reviews";
+    }
   }
-}
-
-
 
   document.addEventListener('DOMContentLoaded', loadExistingReviews);
 
   document.addEventListener("click", async (e) => {
-    const btn = e.target.closest("#translate"); // closest = upward
-    //   const trans = btn.parentElement.querySelector(".lanstatus"); // 
+    const btn = e.target.closest("#translate");
     if (!btn) return;
 
-    const card = btn.closest(".overalluser");//?.querySelector(".review");
+    const card = btn.closest(".overalluser");
     const review = card.querySelector(".review");
     const status = card.querySelector(".lanstatus");
     if (!review) return;
 
-    if(!review.dataset.original){
+    if (!review.dataset.original) {
       review.dataset.original = review.innerText;
     }
     btn.disabled = true;
 
-   if (!review.dataset.translated) {
-    status.innerText = "translating...";
-    const translated = await translateall(review.innerText);
-    review.innerText = translated;
-    review.dataset.translated = "true";
-    status.innerText = "Translated";
-  } else {
-    review.innerText = review.dataset.original;
-    delete review.dataset.translated;
-    status.innerHTML = "<b>Available</b>";
-  }
+    if (!review.dataset.translated) {
+      status.innerText = "translating...";
+      const translated = await translateall(review.innerText);
+      review.innerText = translated;
+      review.dataset.translated = "true";
+      status.innerText = "Translated";
+    } else {
+      review.innerText = review.dataset.original;
+      delete review.dataset.translated;
+      status.innerHTML = "<b>Available</b>";
+    }
     btn.disabled = false;
   })
+
   function updateTime() {
     const now = new Date();
-
     let hours = now.getHours();
     const ampm = hours >= 12 ? "PM" : "AM";
-
-    hours = hours % 12 || 12;  // 0 % 12 || 12  give 12  as no 0 hour it will be show 12 and 13% 12 = 1 hour 
+    hours = hours % 12 || 12;
     let minutes = now.getMinutes().toString().padStart(2, "0");
     let seconds = now.getSeconds().toString().padStart(2, "0");
-
-    document.getElementById("time").innerText =
-      `${hours}:${minutes}:${seconds} ${ampm}`;
+    document.getElementById("time").innerText = `${hours}:${minutes}:${seconds} ${ampm}`;
   }
 
   setInterval(updateTime, 1000);
