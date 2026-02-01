@@ -9,7 +9,7 @@ body {
 
 .commentb {
   width: 80vw;
-  height: 40vh;
+  height: 45vh;
   border: 1px solid white;
   margin: auto;
   display: flex;
@@ -19,10 +19,21 @@ body {
   flex-direction: column;
 }
 
+.commentb span {
+   width: 80vw;
+   margin-left: 7vw;
+   margin-top: 5px;
+}
+
+#error{
+  margin-left: 55%;
+}
 .commentb h3 {
   color: yellow;
-  margin-left: 30vw;
+  margin-left: 48vw;
 }
+
+
 
 #time {
   color: white;
@@ -41,8 +52,15 @@ textarea {
   font-size: medium;
   box-sizing: border-box;
   overflow: hidden;
+  position: relative;
 }
 
+#exp{
+  position:absolute;
+  margin: auto;
+  margin-left: 61vw;
+  margin-top: 220px;
+}
 textarea:focus {
   background-color: rgb(255, 255, 255);
   border: 3px solid yellow;
