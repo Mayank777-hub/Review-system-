@@ -1,7 +1,7 @@
 const multer = require("multer");
 const express = require("express");
 const cloudinary = require("cloudinary").v2;
-const {Cloudinarystorage} = require("multer-storage-cloudinary");
+const {CloudinaryStorage} = require("multer-storage-cloudinary");
 const app = express();
 const cors = require("cors");
 const path = require("path");
@@ -31,7 +31,7 @@ cloudinary.config({
 //});  // aws S3,clousflare or cloundiary is better so i use it that here rather then diskstorage
 
 const storage = new Cloudinarystorage({
-    cloundiary:cloudinary,
+     cloudinary: cloudinary,
     params:{
         folder:"media_uploads",
         resource_type:"auto",
