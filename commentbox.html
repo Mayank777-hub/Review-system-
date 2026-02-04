@@ -147,6 +147,71 @@
     emptytext = text.value.trim().length > 0;
   })
 
+
+   function detectMediaType(mediaInput) {
+    // Handle null, undefined, or empty input
+    if (!mediaInput) {
+      console.warn("Media input is null or undefined");
+      return 'image';
+    }
+
+    // Extract URL string from object or use string directly
+    let url;
+    if (typeof mediaInput === 'object' && mediaInput.url) {
+      url = mediaInput.url;
+    } else if (typeof mediaInput === 'string') {
+      url = mediaInput;
+    } else {
+      console.warn("Invalid media format:", mediaInput);
+      return 'image';
+    }
+
+    // Ensure url is a string before using string methods
+    if (typeof url !== 'string') {
+      console.warn("URL is not a string:", url);
+      return 'image';
+    }
+
+    // Check Cloudinary URL pattern: .../image/... or .../video/...
+    if (url.includes('/video/upload/') || url.includes('/video/')) {
+      return 'video';
+    }
+    if (url.includes('/image/upload/') || url.includes('/image/')) {
+      return 'image';
+    }
+    
+    
+    const videoExtensions = /\.(mp4|webm|ogg|mov|avi|mkv)$/i;
+    const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i;
+    
+    if (videoExtensions.test(url)) {
+      return 'video';
+    }
+    if (imageExtensions.test(url)) {
+      return 'image';
+    }
+    
+    // Default to image if unclear
+    return 'image';
+  }
+
+
+  function resolveMediaUrl(media) {
+  if (!media) return null;
+  if (typeof media === "string") {
+    if (media.startsWith("http")) return media; // Cloudi URL
+    if (media.trim() === "") return null; // {} string
+    return `http://localhost:3290/uploads/${media}`; // old one file
+  }
+
+  
+  if (typeof media === "object") {
+    if (media.url && media.url.trim() !== "") return media.url;
+    if (media.secure_url && media.secure_url.trim() !== "") return media.secure_url;
+  }
+  return null;
+}
+
   function createReviewElement(reviewData, reviewId = null, createdAt = null, depth = 0) {
     const isReply = depth > 0;
 
@@ -233,26 +298,51 @@ review.innerText = reviewData.Review || "";
 
     if (reviewData.ReviewMedia && reviewData.ReviewMedia.length > 0) {
       reviewData.ReviewMedia.forEach(media => {
-        const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(media.url);
-        const isVideo = /\.(mp4|webm|ogg)$/i.test(media.url);
+        // const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(media.url);
+        // const isVideo = /\.(mp4|webm|ogg)$/i.test(media.url);
+       //  const mediaUrl = media.url || media;
+        // const isVideo = mediaUrl.includes('/video/') || /\.(mp4|webm|ogg)$/i.test(mediaUrl);
+          
+       //  const mediatype = detectMediaType(media);
 
-        if (isImage) {
+    //    const mediaUrl =
+    //  typeof media === 'string'
+    //    ? media
+    //    : media?.url || media?.secure_url || null;
+ const mediaUrl = resolveMediaUrl(media) || undefined;
+
+    if (!mediaUrl) return;
+  const mediatype = detectMediaType(mediaUrl);
+        if (mediatype === 'video') {
+          const video = document.createElement("video");
+          video.src = mediaUrl;
+          video.controls = true;
+          video.style.maxWidth = "100%";
+          video.style.marginTop = "5px";
+          video.style.borderRadius = "6px";
+          
+          
+          video.onerror = () => {
+            console.error("Failed to load video:", mediaUrl);
+          };
+          
+          overalluser.appendChild(video);
+        } else {
+         
           const img = document.createElement("img");
-          img.src = media.url;
+          img.src = mediaUrl;
           img.style.maxWidth = "100%";
           img.style.borderRadius = "6px";
           img.style.marginTop = "5px";
           img.style.margin = "auto";
-          img.style.backgroundColor = "black"
-          overalluser.appendChild(img);
-        } else if (isVideo) {
-          const video = document.createElement("video");
-          video.src = media.url;
-          video.controls = true;
-          video.style.maxWidth = "100%";
-          video.style.marginTop = "5px";
-          overalluser.appendChild(video);
-        }
+          img.style.backgroundColor = "black";
+          
+         
+          img.onerror = () => {
+            console.error("Failed to load image:", mediaUrl);
+          };
+           overalluser.appendChild(img);
+        } 
       });
     }
 
@@ -341,6 +431,8 @@ showReplyanimation(username, parentReviewId);
     wrap.appendChild(cap);
     return wrap;
   }
+// imp check the type of img / - use test also and extension 
+
   async function sendmessage() {
     const cap = document.createElement("div");
     cap.className = "cap";
@@ -349,7 +441,7 @@ showReplyanimation(username, parentReviewId);
     const reviews = text.value.trim();
     const selectexperience = document.querySelector('select').value;
 
-    if (!reviews.trim()) {
+    if (!reviews.trim() && !selectmedia) {
       showerr.textContent = "Review cannot be empty";
       return;
     }
@@ -357,24 +449,45 @@ showReplyanimation(username, parentReviewId);
       showerr.textContent = "Please share your experience";
       return;
     }
+    if (!replyexist && countstar === 0) {
+  showerr.textContent = "Please select rating";
+  return;
+}
+
 
     let mediaarr = [];
-    if (selectmedia) {
-      const uploaddata = new FormData();
-      uploaddata.append("media", selectmedia);
 
-      try {
-        const uploadres = await fetch("http://localhost:3290/upload", {
-          method: "POST",
-          body: uploaddata
+if (selectmedia) {
+    const uploaddata = new FormData();
+    uploaddata.append("media", selectmedia);
+
+    try {
+        const uploadres = await fetch("http://localhost:3290/upload-cloud", {
+            method: "POST",
+            body: uploaddata
         });
+         
+        
+        if (uploadres.ok) {
+            const media = await uploadres.json();
+           // mediaarr.push(media);
+           mediaarr.push({
+  url: media.secure_url,
+  public_id: media.public_id
+});
 
-        const media = await uploadres.json();
-        mediaarr.push(media);
-      } catch (error) {
-        console.log("Unable to upload media check your network", error);
-      }
+        } else {
+            const errText = await uploadres.text();
+            console.error("Upload failed:", errText);
+            showerr.textContent = "Unable to upload media, check your network";
+        }
+
+    } catch (error) {
+        console.error("Upload error:", error);
+        showerr.textContent = "Unable to upload media, check your network";
     }
+}
+
 
     try {
       send.disabled = true;
